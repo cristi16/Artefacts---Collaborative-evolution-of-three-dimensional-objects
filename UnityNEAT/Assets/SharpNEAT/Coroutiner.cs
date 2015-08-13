@@ -13,28 +13,29 @@ using System.Collections;
 ///                 which StartCoroutene can be called, and destroys it when 
 ///                 no longer needed.
 /// </summary>
-public class Coroutiner{
-
-    public static Coroutine StartCoroutine(IEnumerator iterationResult) {
+public class Coroutiner
+{
+    public static Coroutine StartCoroutine(IEnumerator iterationResult)
+    {
         //Create GameObject with MonoBehaviour to handle task.
         GameObject routeneHandlerGo = new GameObject("Coroutiner");
-        CoroutinerInstance routeneHandler 
-                = routeneHandlerGo.AddComponent(typeof(CoroutinerInstance)) 
+        CoroutinerInstance routeneHandler
+                = routeneHandlerGo.AddComponent(typeof(CoroutinerInstance))
                                                         as CoroutinerInstance;
         return routeneHandler.ProcessWork(iterationResult);
     }
-
 }
 
-public class CoroutinerInstance : MonoBehaviour {
-
-    public Coroutine ProcessWork(IEnumerator iterationResult) {
+public class CoroutinerInstance : MonoBehaviour
+{
+    public Coroutine ProcessWork(IEnumerator iterationResult)
+    {
         return StartCoroutine(DestroyWhenComplete(iterationResult));
     }
 
-    public IEnumerator DestroyWhenComplete(IEnumerator iterationResult) {
+    public IEnumerator DestroyWhenComplete(IEnumerator iterationResult)
+    {
         yield return StartCoroutine(iterationResult);
         Destroy(gameObject);
     }
-
 }

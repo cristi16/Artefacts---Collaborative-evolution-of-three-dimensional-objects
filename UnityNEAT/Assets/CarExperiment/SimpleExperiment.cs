@@ -17,7 +17,6 @@ using System;
 
 public class SimpleExperiment : INeatExperiment
 {
-
     NeatEvolutionAlgorithmParameters _eaParams;
     NeatGenomeParameters _neatGenomeParams;
     string _name;
