@@ -8,8 +8,8 @@ using System;
 using System.Xml;
 using System.IO;
 
-public class Optimizer : MonoBehaviour {
-
+public class Optimizer : MonoBehaviour
+{
     const int NUM_INPUTS = 5;
     const int NUM_OUTPUTS = 2;
 
@@ -34,8 +34,8 @@ public class Optimizer : MonoBehaviour {
     private uint Generation;
     private double Fitness;
 
-	// Use this for initialization
-	void Start () {
+    void Start()
+    {
         Utility.DebugLog = true;
         experiment = new SimpleExperiment();
         XmlDocument xmlConfig = new XmlDocument();
@@ -49,13 +49,10 @@ public class Optimizer : MonoBehaviour {
         popFileSavePath = Application.persistentDataPath + string.Format("/{0}.pop.xml", "car");
 
         print(champFileSavePath);
-	}
+    }
 
-    // Update is called once per frame
     void Update()
     {
-      //  evaluationStartTime += Time.deltaTime;
-
         timeLeft -= Time.deltaTime;
         accum += Time.timeScale / Time.deltaTime;
         ++frames;
@@ -76,7 +73,7 @@ public class Optimizer : MonoBehaviour {
     }
 
     public void StartEA()
-    {        
+    {
         Utility.DebugLog = true;
         Utility.Log("Starting PhotoTaxis experiment");
         // print("Loading: " + popFileLoadPath);
@@ -88,8 +85,7 @@ public class Optimizer : MonoBehaviour {
 
         var evoSpeed = 25;
 
-     //   Time.fixedDeltaTime = 0.045f;
-        Time.timeScale = evoSpeed;       
+        Time.timeScale = evoSpeed;
         _ea.StartContinue();
         EARunning = true;
     }
@@ -101,11 +97,10 @@ public class Optimizer : MonoBehaviour {
 
         Fitness = _ea.Statistics._maxFitness;
         Generation = _ea.CurrentGeneration;
-      
 
-    //    Utility.Log(string.Format("Moving average: {0}, N: {1}", _ea.Statistics._bestFitnessMA.Mean, _ea.Statistics._bestFitnessMA.Length));
+        //Utility.Log(string.Format("Moving average: {0}, N: {1}", _ea.Statistics._bestFitnessMA.Mean, _ea.Statistics._bestFitnessMA.Length));
 
-    
+
     }
 
     void ea_PauseEvent(object sender, EventArgs e)
@@ -127,7 +122,6 @@ public class Optimizer : MonoBehaviour {
             experiment.SavePopulation(xw, _ea.GenomeList);
         }
         // Also save the best genome
-
         using (XmlWriter xw = XmlWriter.Create(champFileSavePath, _xwSettings))
         {
             experiment.SavePopulation(xw, new NeatGenome[] { _ea.CurrentChampGenome });
@@ -135,17 +129,12 @@ public class Optimizer : MonoBehaviour {
         DateTime endTime = DateTime.Now;
         Utility.Log("Total time elapsed: " + (endTime - startTime));
 
-        System.IO.StreamReader stream = new System.IO.StreamReader(popFileSavePath);
-       
+        EARunning = false;
 
-      
-        EARunning = false;        
-        
     }
 
     public void StopEA()
     {
-
         if (_ea != null && _ea.RunState == SharpNeat.Core.RunState.Running)
         {
             _ea.Stop();
@@ -175,14 +164,11 @@ public class Optimizer : MonoBehaviour {
 
         NeatGenome genome = null;
 
-
         // Try to load the genome from the XML document.
         try
         {
             using (XmlReader xr = XmlReader.Create(champFileSavePath))
                 genome = NeatGenomeXmlIO.ReadCompleteGenomeList(xr, false, (NeatGenomeFactory)experiment.CreateGenomeFactory())[0];
-
-
         }
         catch (Exception e1)
         {

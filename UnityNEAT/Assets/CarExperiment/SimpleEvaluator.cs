@@ -4,9 +4,9 @@ using SharpNeat.Core;
 using SharpNeat.Phenomes;
 using System.Collections.Generic;
 
-public class SimpleEvaluator : IPhenomeEvaluator<IBlackBox> {
-
-	ulong _evalCount;
+public class SimpleEvaluator : IPhenomeEvaluator<IBlackBox>
+{
+    ulong _evalCount;
     bool _stopConditionSatisfied;
     Optimizer optimizer;
     FitnessInfo fitness;
@@ -37,10 +37,10 @@ public class SimpleEvaluator : IPhenomeEvaluator<IBlackBox> {
             yield return new WaitForSeconds(optimizer.TrialDuration);
             optimizer.StopEvaluation(box);
             float fit = optimizer.GetFitness(box);
-           
+
             FitnessInfo fitness = new FitnessInfo(fit, fit);
             dict.Add(box, fitness);
-           
+
         }
     }
 
@@ -52,10 +52,8 @@ public class SimpleEvaluator : IPhenomeEvaluator<IBlackBox> {
 
     public FitnessInfo GetLastFitness()
     {
-        
         return this.fitness;
     }
-
 
     public FitnessInfo GetLastFitness(IBlackBox phenome)
     {
@@ -63,10 +61,10 @@ public class SimpleEvaluator : IPhenomeEvaluator<IBlackBox> {
         {
             FitnessInfo fit = dict[phenome];
             dict.Remove(phenome);
-           
+
             return fit;
         }
-        
+
         return FitnessInfo.Zero;
     }
 }

@@ -2,8 +2,8 @@
 using System.Collections;
 using SharpNeat.Phenomes;
 
-public class CarController : UnitController {
-
+public class CarController : UnitController
+{
     public float Speed = 5f;
     public float TurnSpeed = 180f;
     public int Lap = 1;
@@ -11,42 +11,12 @@ public class CarController : UnitController {
     bool MovingForward = true;
     bool IsRunning;
     public float SensorRange = 10;
-    int WallHits; 
+    int WallHits;
     IBlackBox box;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
     void FixedUpdate()
     {
-        //grab the input axes
-        //var steer = Input.GetAxis("Horizontal");
-        //var gas = Input.GetAxis("Vertical");
-
-        ////if they're hittin' the gas...
-        //if (gas != 0)
-        //{
-        //    //take the throttle level (with keyboard, generally +1 if up, -1 if down)
-        //    //  and multiply by speed and the timestep to get the distance moved this frame
-        //    var moveDist = gas * speed * Time.deltaTime;
-
-        //    //now the turn amount, similar drill, just turnSpeed instead of speed
-        //    //   we multiply in gas as well, which properly reverses the steering when going 
-        //    //   backwards, and scales the turn amount with the speed
-        //    var turnAngle = steer * turnSpeed * Time.deltaTime * gas;
-
-        //    //now apply 'em, starting with the turn           
-        //    transform.Rotate(0, turnAngle, 0);
-
-        //    //and now move forward by moveVect
-        //    transform.Translate(Vector3.forward * moveDist);
-        //}
-
         // Five sensors: Front, left front, left, right front, right
-
         if (IsRunning)
         {
             float frontSensor = 0;
@@ -130,10 +100,10 @@ public class CarController : UnitController {
     }
 
     public void NewLap()
-    {        
+    {
         if (LastPiece > 2 && MovingForward)
         {
-            Lap++;            
+            Lap++;
         }
     }
 
@@ -149,7 +119,7 @@ public class CarController : UnitController {
             piece = 17;
         }
         float fit = Lap * piece - WallHits * 0.2f;
-      //  print(string.Format("Piece: {0}, Lap: {1}, Fitness: {2}", piece, Lap, fit));
+        //  print(string.Format("Piece: {0}, Lap: {1}, Fitness: {2}", piece, Lap, fit));
         if (fit > 0)
         {
             return fit;
@@ -162,13 +132,13 @@ public class CarController : UnitController {
         if (collision.collider.tag.Equals("Road"))
         {
             RoadPiece rp = collision.collider.GetComponent<RoadPiece>();
-          //  print(collision.collider.tag + " " + rp.PieceNumber);
-            
+            //  print(collision.collider.tag + " " + rp.PieceNumber);
+
             if ((rp.PieceNumber != LastPiece) && (rp.PieceNumber == CurrentPiece + 1 || (MovingForward && rp.PieceNumber == 0)))
             {
                 LastPiece = CurrentPiece;
                 CurrentPiece = rp.PieceNumber;
-                MovingForward = true;                
+                MovingForward = true;
             }
             else
             {
@@ -184,12 +154,4 @@ public class CarController : UnitController {
             WallHits++;
         }
     }
-
-
-
-    //void OnGUI()
-    //{
-    //    GUI.Button(new Rect(10, 200, 100, 100), "Forward: " + MovingForward + "\nPiece: " + CurrentPiece + "\nLast: " + LastPiece + "\nLap: " + Lap);
-    //}
-    
 }
