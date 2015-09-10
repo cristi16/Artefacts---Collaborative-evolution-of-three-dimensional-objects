@@ -35,11 +35,8 @@ namespace SharpNeat.EvolutionAlgorithms
     /// Abstract class providing some common/baseline data and methods for implementions of IEvolutionAlgorithm.
     /// </summary>
     /// <typeparam name="TGenome">The genome type that the algorithm will operate on.</typeparam>
-    public abstract class AbstractGenerationalAlgorithm<TGenome> : IEvolutionAlgorithm<TGenome>
-        where TGenome : class, IGenome<TGenome>
+    public abstract class AbstractGenerationalAlgorithm<TGenome> : IEvolutionAlgorithm<TGenome> where TGenome : class, IGenome<TGenome>
     {
-     //   private static readonly ILog __log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         #region Instance Fields
 
         protected IGenomeListEvaluator<TGenome> _genomeListEvaluator;

@@ -1,4 +1,4 @@
-﻿using SharpNeat.Domains;
+using SharpNeat.Domains;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Decoders;
