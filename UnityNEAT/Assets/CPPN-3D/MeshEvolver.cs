@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Xml;
@@ -8,21 +9,34 @@ using SharpNeat.Phenomes;
 using UnityEngine.Assertions;
 using UnityEngine.Assertions.Must;
 
+[Serializable]
+public class VoxelVolume
+{
+    public int width = 16;
+    public int height = 16;
+    public int length = 16;
+}
+
 public class MeshEvolver : MonoBehaviour
 {
+    public float RotationSpeed = 30f;
 
     private const int k_numberOfInputs = 4;
-    private const int k_numberOfOutputs = 1;
+    private const int k_numberOfOutputs = 4;
 
     private MeshEvolutionExperiment m_experiment;
     private NeatInteractiveEvolutionAlgorithm<NeatGenome> m_evolutionaryAlgorithm;
 
-    private GameObject m_mesh;
-	
-	void Start () 
-	{
-	    m_experiment = new MeshEvolutionExperiment();
+    private GameObject m_meshGameObject;
 
+    public VoxelVolume m_voxelVolume;
+
+
+    void Start () 
+	{
+        
+	    m_experiment = new MeshEvolutionExperiment();
+        
 	    XmlDocument xmlConfig = new XmlDocument();
 	    TextAsset textAsset = (TextAsset)Resources.Load("MeshEvolutionExperiment.config");
 	    xmlConfig.LoadXml(textAsset.text);
@@ -38,11 +52,13 @@ public class MeshEvolver : MonoBehaviour
         //Cubes is faster and creates less verts, tetrahedrons is slower and creates more verts but better represents the mesh surface
         MarchingCubes.SetModeToCubes();
 
-        m_mesh = new GameObject("Mesh");
-        m_mesh.AddComponent<MeshFilter>();
-        m_mesh.AddComponent<MeshRenderer>();
-        m_mesh.GetComponent<Renderer>().material = new Material(Shader.Find("Legacy Shaders/Diffuse"));
-    }
+        m_meshGameObject = new GameObject("Mesh");
+        m_meshGameObject.AddComponent<MeshFilter>();
+        m_meshGameObject.AddComponent<MeshRenderer>();
+        m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Legacy Shaders/Diffuse"));
+
+	    StartCoroutine(RotateMesh());
+	}
 
     void GenerationalEvolutionListener()
     {
@@ -51,55 +67,40 @@ public class MeshEvolver : MonoBehaviour
 
 	void Update () 
 	{
-	    if (Input.GetKey(KeyCode.Space))
+	    if (Input.GetKey(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow))
 	    {
 	        m_evolutionaryAlgorithm.EvolveOneStep();
 	        var phenom = m_experiment.GenomeDecoder.Decode(m_evolutionaryAlgorithm.GenomeList[0]);
 
-            var width = 16;
-            var height = 16;
-            var length = 16;
+            var voxels = new float[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
 
-            var voxels = new float[width, height, length];
-
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < m_voxelVolume.width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < m_voxelVolume.height; y++)
                 {
-                    for (int z = 0; z < length; z++)
+                    for (int z = 0; z < m_voxelVolume.length; z++)
                     {
                         ISignalArray inputArr = phenom.InputSignalArray;
-                        inputArr[0] = (float)x / width * 2 - 1;
-                        inputArr[1] = (float)y / height * 2 - 1;
-                        inputArr[2] = (float)z / length * 2 - 1;
-                        
-                        var point = new Vector3(Mathf.Abs(x - width/2f), Mathf.Abs(y - height/2f), Mathf.Abs(z - length/2f));
-                        var sphere = point.sqrMagnitude / (width / 3f * width / 3f);
-                        if (sphere > 1)
-                            sphere *= 100f;
+                        inputArr[0] = (float)x /m_voxelVolume.width * 2 - 1;
+                        inputArr[1] = (float)y /m_voxelVolume.height * 2 - 1;
+                        inputArr[2] = (float)z /m_voxelVolume.length * 2 - 1;
 
-                        var bounds = new Vector3(width/4f, height/6f, length/5f);
-                        var distance = bounds - point;
-                        var max = Mathf.Max(distance.x, distance.y, distance.z);
-                        if (max == distance.x)
-                            max /= bounds.x;
-                        if (max == distance.y)
-                            max /= bounds.y;
-                        if (max == distance.z)
-                            max /= bounds.z;
+                        var sphereDistance = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 3f);
 
-                        if (point.x > bounds.x || point.y > bounds.y || point.z > bounds.z)
-                            inputArr[3] = 100f;
-                        else
-                            inputArr[3] = max;
+                        var boxSize = new Vector3(6, m_voxelVolume.height / 6f, m_voxelVolume.length / 5f);
+                        var boxDistance = DistanceFunctions.BoxDistance(x, y, z, m_voxelVolume, boxSize);
 
-                        inputArr[3] = Mathf.Min((float)inputArr[3], sphere);
+                        inputArr[3] = Mathf.Min(sphereDistance, boxDistance);
+
+                        //inputArr[3] = DistanceFunctions.DistanceToCenter(x, y, z, m_voxelVolume);
+
                         phenom.Activate();
 
                         ISignalArray outputArr = phenom.OutputSignalArray;
 
                         // 0 - means the voxel will be filled, any other value means it won't be filled
                         voxels[x, y, z] = (float) outputArr[0] > 0.3f ? 0f : 1f;
+
                     }
                 }
             }
@@ -111,7 +112,34 @@ public class MeshEvolver : MonoBehaviour
             mesh.RecalculateNormals();
 
             
-            m_mesh.GetComponent<MeshFilter>().mesh = mesh;
+            m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
         }
 	}
+
+    private IEnumerator RotateMesh()
+    {
+        while (true)
+        {
+            m_meshGameObject.transform.Rotate(Vector3.one, RotationSpeed * Time.deltaTime);
+            yield return null;
+        }        
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length));
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(7 * 2, m_voxelVolume.height / 3f, m_voxelVolume.length / 2.5f));
+
+        var color = Color.cyan;;
+        color.a = 0.5f;
+        Gizmos.color = color;
+        Gizmos.DrawSphere(Vector3.zero, m_voxelVolume.width / 3f);
+
+        //Gizmos.color = Color.green;
+        //if(m_meshGameObject.GetComponent<MeshFilter>().mesh)
+        //    Gizmos.DrawWireMesh(m_meshGameObject.GetComponent<MeshFilter>().mesh);
+    }
 }

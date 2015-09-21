@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-	
+using System.Linq;
+
 static public class MarchingCubes
 {
 	//Function delegates, makes using functions pointers easier
@@ -38,6 +40,9 @@ static public class MarchingCubes
 			}
 		}
 		
+        //Center pivot point
+	    verts = verts.ConvertAll(vert => vert -= new Vector3(voxels.GetLength(0)/2f, voxels.GetLength(1)/2f, voxels.GetLength(2)/2f));
+
 		Mesh mesh = new Mesh();
 
 		mesh.vertices = verts.ToArray();		
