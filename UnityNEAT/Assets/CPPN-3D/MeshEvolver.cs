@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms;
@@ -20,6 +21,7 @@ public class VoxelVolume
 public class MeshEvolver : MonoBehaviour
 {
     public float RotationSpeed = 30f;
+    public VoxelVolume m_voxelVolume;
 
     private const int k_numberOfInputs = 4;
     private const int k_numberOfOutputs = 4;
@@ -28,9 +30,7 @@ public class MeshEvolver : MonoBehaviour
     private NeatInteractiveEvolutionAlgorithm<NeatGenome> m_evolutionaryAlgorithm;
 
     private GameObject m_meshGameObject;
-
-    public VoxelVolume m_voxelVolume;
-
+    private Color[,,] colorOutput;
 
     void Start () 
 	{
@@ -73,7 +73,8 @@ public class MeshEvolver : MonoBehaviour
 	        var phenom = m_experiment.GenomeDecoder.Decode(m_evolutionaryAlgorithm.GenomeList[0]);
 
             var voxels = new float[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
-
+            colorOutput = new Color[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
+	        
             for (int x = 0; x < m_voxelVolume.width; x++)
             {
                 for (int y = 0; y < m_voxelVolume.height; y++)
@@ -101,11 +102,23 @@ public class MeshEvolver : MonoBehaviour
                         // 0 - means the voxel will be filled, any other value means it won't be filled
                         voxels[x, y, z] = (float) outputArr[0] > 0.3f ? 0f : 1f;
 
+                        float r = Mathf.Max(0, (float) outputArr[1]);
+                        float g = Mathf.Max(0, (float)outputArr[2]);
+                        float b = Mathf.Max(0, (float)outputArr[3]);
+                        colorOutput[x,y,z] = new Color(r * 2, g * 3, b * 4);
                     }
                 }
             }
 
             Mesh mesh = MarchingCubes.CreateMesh(voxels);
+
+	        List<Color> vertexColors = new List<Color>();
+	        foreach (var vertex in mesh.vertices)
+	        {
+	            var zeroBasedVertex = vertex + new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length);
+                vertexColors.Add(colorOutput[ GetIndex(zeroBasedVertex.x), GetIndex(zeroBasedVertex.y), GetIndex(zeroBasedVertex.z)]);
+	        }
+	        mesh.colors = vertexColors.ToArray();
 
             //The diffuse shader wants uvs so just fill with a empty array, there not actually used
             mesh.uv = new Vector2[mesh.vertices.Length];
@@ -115,6 +128,11 @@ public class MeshEvolver : MonoBehaviour
             m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
         }
 	}
+
+    private int GetIndex(float value)
+    {
+        return Mathf.Abs(Mathf.RoundToInt(value))%(m_voxelVolume.width - 1);
+    }
 
     private IEnumerator RotateMesh()
     {
