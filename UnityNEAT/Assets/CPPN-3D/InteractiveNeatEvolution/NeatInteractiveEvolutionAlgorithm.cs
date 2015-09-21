@@ -130,7 +130,7 @@ namespace SharpNeat.EvolutionAlgorithms
         protected override IEnumerator PerformOneGeneration()
         {
             // Create offspring.
-            List<TGenome> offspringList = CreateAsexualOffspring(1);
+            _genomeList = CreateAsexualOffspring(1);
 
             // Update stats and store reference to best genome.
             UpdateStats();

@@ -34,6 +34,9 @@ public class Optimizer : MonoBehaviour
     private uint Generation;
     private double Fitness;
 
+    private float m_frames;
+    private float m_generation;
+
     void Start()
     {
         Utility.DebugLog = true;
@@ -47,7 +50,6 @@ public class Optimizer : MonoBehaviour
 
         champFileSavePath = Application.persistentDataPath + string.Format("/{0}.champ.xml", "car");
         popFileSavePath = Application.persistentDataPath + string.Format("/{0}.pop.xml", "car");
-
         print(champFileSavePath);
     }
 
@@ -100,7 +102,7 @@ public class Optimizer : MonoBehaviour
 
         //Utility.Log(string.Format("Moving average: {0}, N: {1}", _ea.Statistics._bestFitnessMA.Mean, _ea.Statistics._bestFitnessMA.Length));
 
-
+        
     }
 
     void ea_PauseEvent(object sender, EventArgs e)

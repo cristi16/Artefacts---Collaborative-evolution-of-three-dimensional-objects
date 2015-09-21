@@ -15,7 +15,7 @@ using System;
 using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Network;
 
-public class MeshEvolutionExperiment : INeatExperiment
+public class MeshEvolutionExperiment
 {
 #region Private Fields
 
@@ -23,18 +23,17 @@ public class MeshEvolutionExperiment : INeatExperiment
     NeatGenomeParameters _neatGenomeParams;
     string _name;
     int _populationSize;
-    int _specieCount;
     NetworkActivationScheme _activationScheme;
     string _complexityRegulationStr;
     int? _complexityThreshold;
     string _description;
-    Optimizer _optimizer;
     int _inputCount;
     int _outputCount;
+    private IGenomeDecoder<NeatGenome, IBlackBox> _genomeDecoder;
 
 #endregion Private Fields
 
-#region Properties
+    #region Properties
 
     public string Name
     {
@@ -71,12 +70,12 @@ public class MeshEvolutionExperiment : INeatExperiment
         get { return _neatGenomeParams; }
     }
 
-#endregion Properties
-
-    public void SetOptimizer(Optimizer se)
+    public IGenomeDecoder<NeatGenome, IBlackBox> GenomeDecoder
     {
-        this._optimizer = se;
+        get { return _genomeDecoder; }   
     }
+
+    #endregion Properties
 
     public void Initialize(string name, XmlElement xmlConfig)
     {
@@ -87,14 +86,12 @@ public class MeshEvolutionExperiment : INeatExperiment
     {
         _name = name;
         _populationSize = XmlUtils.GetValueAsInt(xmlConfig, "PopulationSize");
-        _specieCount = XmlUtils.GetValueAsInt(xmlConfig, "SpecieCount");
         _activationScheme = ExperimentUtils.CreateActivationScheme(xmlConfig, "Activation");
         _complexityRegulationStr = XmlUtils.TryGetValueAsString(xmlConfig, "ComplexityRegulationStrategy");
         _complexityThreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
         _description = XmlUtils.TryGetValueAsString(xmlConfig, "Description");
 
         _eaParams = new NeatEvolutionAlgorithmParameters();
-        _eaParams.SpecieCount = _specieCount;
         _neatGenomeParams = new NeatGenomeParameters();
         _neatGenomeParams.FeedforwardOnly = _activationScheme.AcyclicNetwork;
 
@@ -123,7 +120,7 @@ public class MeshEvolutionExperiment : INeatExperiment
         return new CppnGenomeFactory(InputCount, OutputCount, DefaultActivationFunctionLibrary.CreateLibraryCppn(), _neatGenomeParams);
     }
 
-    public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(string fileName)
+    public NeatInteractiveEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(string fileName)
     {
         List<NeatGenome> genomeList = null;
         IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
@@ -149,12 +146,12 @@ public class MeshEvolutionExperiment : INeatExperiment
         return CreateEvolutionAlgorithm(genomeFactory, genomeList);
     }
 
-    public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
+    public NeatInteractiveEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm()
     {
         return CreateEvolutionAlgorithm(_populationSize);
     }
 
-    public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize)
+    public NeatInteractiveEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(int populationSize)
     {
         IGenomeFactory<NeatGenome> genomeFactory = CreateGenomeFactory();
 
@@ -163,23 +160,15 @@ public class MeshEvolutionExperiment : INeatExperiment
         return CreateEvolutionAlgorithm(genomeFactory, genomeList);
     }
 
-    public NeatEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList)
+    public NeatInteractiveEvolutionAlgorithm<NeatGenome> CreateEvolutionAlgorithm(IGenomeFactory<NeatGenome> genomeFactory, List<NeatGenome> genomeList)
     {
-        IDistanceMetric distanceMetric = new ManhattanDistanceMetric(1.0, 0.0, 10.0);
-        ISpeciationStrategy<NeatGenome> speciationStrategy = new KMeansClusteringStrategy<NeatGenome>(distanceMetric);
+        _genomeDecoder = CreateGenomeDecoder();
 
         IComplexityRegulationStrategy complexityRegulationStrategy = ExperimentUtils.CreateComplexityRegulationStrategy(_complexityRegulationStr, _complexityThreshold);
 
-        NeatEvolutionAlgorithm<NeatGenome> ea = new NeatEvolutionAlgorithm<NeatGenome>(_eaParams, speciationStrategy, complexityRegulationStrategy);
+        var ea = new NeatInteractiveEvolutionAlgorithm< NeatGenome>(_eaParams, complexityRegulationStrategy);
 
-        // Create black box evaluator
-        SimpleEvaluator evaluator = new SimpleEvaluator(_optimizer);
-
-        IGenomeDecoder<NeatGenome, IBlackBox> genomeDecoder = CreateGenomeDecoder();
-
-        IGenomeListEvaluator<NeatGenome> innerEvaluator = new UnityParallelListEvaluator<NeatGenome, IBlackBox>(genomeDecoder, evaluator, _optimizer);
-
-        ea.Initialize(innerEvaluator, genomeFactory, genomeList);
+        ea.Initialize(genomeList);
 
         return ea;
     }

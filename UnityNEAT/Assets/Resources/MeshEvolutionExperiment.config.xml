@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
     <Config>
-      <PopulationSize>10</PopulationSize>
-      <SpecieCount>0</SpecieCount>
+      <PopulationSize>1</PopulationSize>
       <Activation>
         <Scheme>Acyclic</Scheme>
       </Activation>
       <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
       <ComplexityThreshold>10</ComplexityThreshold>
       <Description>
-        Evolving a car controller
+        Interactive evolution of a 3D mesh
       </Description>
 
     </Config>

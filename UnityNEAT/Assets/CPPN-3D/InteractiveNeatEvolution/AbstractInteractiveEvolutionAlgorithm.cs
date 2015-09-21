@@ -56,6 +56,7 @@ namespace SharpNeat.EvolutionAlgorithms
             _currentGeneration = 0;
             _genomeList = genomeList;
             _populationSize = _genomeList.Count;
+            _isInitialized = true;
         }
 
         /// <summary>
@@ -68,6 +69,7 @@ namespace SharpNeat.EvolutionAlgorithms
             _currentGeneration = 0;
             _genomeList = genomeFactory.CreateGenomeList(populationSize, _currentGeneration);
             _populationSize = populationSize;
+            _isInitialized = true;
         }
 
         /// <summary>
