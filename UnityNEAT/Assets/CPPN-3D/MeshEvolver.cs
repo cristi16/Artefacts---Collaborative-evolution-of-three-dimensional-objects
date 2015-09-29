@@ -20,11 +20,15 @@ public class VoxelVolume
 
 public class MeshEvolver : MonoBehaviour
 {
+    public enum TestType { DistanceToCenter, Sphere, Box, Combined}
+
     public float RotationSpeed = 30f;
     public VoxelVolume m_voxelVolume;
+    public TestType testType;
+    public bool showGizmos = false;
 
     private const int k_numberOfInputs = 4;
-    private const int k_numberOfOutputs = 4;
+    private const int k_numberOfOutputs = 1;
 
     private MeshEvolutionExperiment m_experiment;
     private NeatInteractiveEvolutionAlgorithm<NeatGenome> m_evolutionaryAlgorithm;
@@ -55,7 +59,8 @@ public class MeshEvolver : MonoBehaviour
         m_meshGameObject = new GameObject("Mesh");
         m_meshGameObject.AddComponent<MeshFilter>();
         m_meshGameObject.AddComponent<MeshRenderer>();
-        m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Legacy Shaders/Diffuse"));
+        m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
+        Camera.main.GetComponent<CameraMouseOrbit>().target = m_meshGameObject.transform;
 
 	    StartCoroutine(RotateMesh());
 	}
@@ -91,7 +96,21 @@ public class MeshEvolver : MonoBehaviour
                         var boxSize = new Vector3(6, m_voxelVolume.height / 6f, m_voxelVolume.length / 5f);
                         var boxDistance = DistanceFunctions.BoxDistance(x, y, z, m_voxelVolume, boxSize);
 
-                        inputArr[3] = Mathf.Min(sphereDistance, boxDistance);
+                        switch (testType)
+                        {
+                            case TestType.Sphere:
+                                inputArr[3] = sphereDistance;
+                                break;
+                            case TestType.Box:
+                                inputArr[3] = boxDistance;
+                                break;
+                            case TestType.Combined:
+                                inputArr[3] = Mathf.Min(sphereDistance, boxDistance);
+                                break;
+                            case TestType.DistanceToCenter:
+                                inputArr[3] = DistanceFunctions.DistanceToCenter(x, y, z, m_voxelVolume);
+                                break;
+                        }
 
                         //inputArr[3] = DistanceFunctions.DistanceToCenter(x, y, z, m_voxelVolume);
 
@@ -102,23 +121,23 @@ public class MeshEvolver : MonoBehaviour
                         // 0 - means the voxel will be filled, any other value means it won't be filled
                         voxels[x, y, z] = (float) outputArr[0] > 0.3f ? 0f : 1f;
 
-                        float r = Mathf.Max(0, (float) outputArr[1]);
-                        float g = Mathf.Max(0, (float)outputArr[2]);
-                        float b = Mathf.Max(0, (float)outputArr[3]);
-                        colorOutput[x,y,z] = new Color(r * 2, g * 3, b * 4);
+                        //float r = Mathf.Max(0, (float) outputArr[1]);
+                        //float g = Mathf.Max(0, (float)outputArr[2]);
+                        //float b = Mathf.Max(0, (float)outputArr[3]);
+                        //colorOutput[x,y,z] = new Color(r * 2, g * 3, b * 4);
                     }
                 }
             }
 
             Mesh mesh = MarchingCubes.CreateMesh(voxels);
 
-	        List<Color> vertexColors = new List<Color>();
-	        foreach (var vertex in mesh.vertices)
-	        {
-	            var zeroBasedVertex = vertex + new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length);
-                vertexColors.Add(colorOutput[ GetIndex(zeroBasedVertex.x), GetIndex(zeroBasedVertex.y), GetIndex(zeroBasedVertex.z)]);
-	        }
-	        mesh.colors = vertexColors.ToArray();
+	        //List<Color> vertexColors = new List<Color>();
+	        //foreach (var vertex in mesh.vertices)
+	        //{
+	        //    var zeroBasedVertex = vertex + new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length);
+         //       vertexColors.Add(colorOutput[ GetIndex(zeroBasedVertex.x), GetIndex(zeroBasedVertex.y), GetIndex(zeroBasedVertex.z)]);
+	        //}
+	        //mesh.colors = vertexColors.ToArray();
 
             //The diffuse shader wants uvs so just fill with a empty array, there not actually used
             mesh.uv = new Vector2[mesh.vertices.Length];
@@ -138,13 +157,15 @@ public class MeshEvolver : MonoBehaviour
     {
         while (true)
         {
-            m_meshGameObject.transform.Rotate(Vector3.one, RotationSpeed * Time.deltaTime);
+            m_meshGameObject.transform.Rotate(Vector3.up, RotationSpeed * Time.deltaTime, Space.World);
             yield return null;
         }        
     }
 
     private void OnDrawGizmos()
     {
+        if(!showGizmos) return;
+
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireCube(Vector3.zero, new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length));
 

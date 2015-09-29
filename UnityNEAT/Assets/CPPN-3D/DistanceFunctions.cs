@@ -11,8 +11,10 @@ public static class DistanceFunctions
     public static float DistanceToCenter(int x, int y, int z, VoxelVolume volume)
     {
         var point = GetPointFromCenter(x, y, z, volume);
-        var maxDimension = Mathf.Max(volume.width, volume.height, volume.length);
-        return point.sqrMagnitude/maxDimension;
+        var maxDistance = Mathf.Max(volume.width, volume.height, volume.length) * Mathf.Sqrt(3) / 2f;
+        var normalized = point.sqrMagnitude/ (maxDistance * maxDistance);
+        normalized = normalized * 2 - 1;
+        return normalized;
     }
 
     public static float SphereDistance(int x, int y, int z, VoxelVolume volume, float radius)
