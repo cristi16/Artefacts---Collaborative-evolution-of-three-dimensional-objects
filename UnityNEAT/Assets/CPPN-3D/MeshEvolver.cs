@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using SharpNeat.Core;
 using SharpNeat.EvolutionAlgorithms;
@@ -47,7 +48,7 @@ public class MeshEvolver : MonoBehaviour
 	    m_experiment.Initialize("Mesh Evolution", xmlConfig.DocumentElement, k_numberOfInputs, k_numberOfOutputs);
 
 	    m_evolutionaryAlgorithm = m_experiment.CreateEvolutionAlgorithm(1);
-	    m_evolutionaryAlgorithm.UpdateEvent = GenerationalEvolutionListener;
+	    m_evolutionaryAlgorithm.UpdateEvent = InteractiveEvolutionListener;
 
         //Winding order of triangles use 2,1,0 or 0,1,2
         MarchingCubes.SetWindingOrder(0, 1, 2);
@@ -65,7 +66,7 @@ public class MeshEvolver : MonoBehaviour
 	    StartCoroutine(RotateMesh());
 	}
 
-    void GenerationalEvolutionListener()
+    void InteractiveEvolutionListener()
     {
         Debug.Log(m_evolutionaryAlgorithm.CurrentGeneration);
     }
@@ -121,32 +122,53 @@ public class MeshEvolver : MonoBehaviour
                         // 0 - means the voxel will be filled, any other value means it won't be filled
                         voxels[x, y, z] = (float) outputArr[0] > 0.3f ? 0f : 1f;
 
-                        //float r = Mathf.Max(0, (float) outputArr[1]);
-                        //float g = Mathf.Max(0, (float)outputArr[2]);
-                        //float b = Mathf.Max(0, (float)outputArr[3]);
-                        //colorOutput[x,y,z] = new Color(r * 2, g * 3, b * 4);
+                        float r = Mathf.Max(0, (float)outputArr[1]);
+                        float g = Mathf.Max(0, (float)outputArr[2]);
+                        float b = Mathf.Max(0, (float)outputArr[3]);
+                        colorOutput[x, y, z] = new Color(r * 2, g * 3, b * 4);
                     }
                 }
             }
 
             Mesh mesh = MarchingCubes.CreateMesh(voxels);
 
-	        //List<Color> vertexColors = new List<Color>();
-	        //foreach (var vertex in mesh.vertices)
-	        //{
-	        //    var zeroBasedVertex = vertex + new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length);
-         //       vertexColors.Add(colorOutput[ GetIndex(zeroBasedVertex.x), GetIndex(zeroBasedVertex.y), GetIndex(zeroBasedVertex.z)]);
-	        //}
-	        //mesh.colors = vertexColors.ToArray();
+            List<Color> vertexColors = new List<Color>();
+            Vector3 furthestZVertex = mesh.vertices[0];
+
+            foreach (var vertex in mesh.vertices)
+            {
+                var zeroBasedVertex = vertex + new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length);
+                vertexColors.Add(colorOutput[GetIndex(zeroBasedVertex.x), GetIndex(zeroBasedVertex.y), GetIndex(zeroBasedVertex.z)]);
+
+                if (vertex.z > furthestZVertex.z)
+                    furthestZVertex = vertex;
+            }
+            mesh.colors = vertexColors.ToArray();
+            Debug.Log(mesh.normals[mesh.vertices.ToList().IndexOf(furthestZVertex)].z > 0);
 
             //The diffuse shader wants uvs so just fill with a empty array, there not actually used
             mesh.uv = new Vector2[mesh.vertices.Length];
             mesh.RecalculateNormals();
-
+            mesh.Optimize();
             
             m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
         }
 	}
+
+    [ContextMenu("Flip winding order")]
+    void InvertWindingOrder()
+    {
+        Mesh mesh = m_meshGameObject.GetComponent<MeshFilter>().mesh;
+        int[] triangles = mesh.triangles;
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            int temp = triangles[i + 1];
+            triangles[i + 1] = triangles[i + 2];
+            triangles[i + 2] = temp;
+        }
+        mesh.triangles = triangles;
+        mesh.RecalculateNormals();
+    }
 
     private int GetIndex(float value)
     {
