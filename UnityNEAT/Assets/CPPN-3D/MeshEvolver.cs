@@ -20,7 +20,6 @@ public class MeshEvolver : MonoBehaviour
 {
     public enum TestType { DistanceToCenter, Sphere, Box, Combined}
 
-    public float RotationSpeed = 30f;
     public VoxelVolume m_voxelVolume;
     public TestType testType;
     public bool showGizmos = false;
@@ -33,7 +32,6 @@ public class MeshEvolver : MonoBehaviour
     private NeatInteractiveEvolutionAlgorithm<NeatGenome> m_evolutionaryAlgorithm;
 
     private GameObject m_meshGameObject;
-    private Color[,,] colorOutput;
     private float[,,] meshFillOutput;
     private float minFill;
     private float maxFill;
@@ -64,8 +62,6 @@ public class MeshEvolver : MonoBehaviour
         m_meshGameObject.AddComponent<ProceduralMesh>();
         m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
         Camera.main.GetComponent<CameraMouseOrbit>().target = m_meshGameObject.transform;
-
-	    StartCoroutine(RotateMesh());
 	}
 
     void InteractiveEvolutionListener()
@@ -81,7 +77,6 @@ public class MeshEvolver : MonoBehaviour
 	        var phenom = m_experiment.GenomeDecoder.Decode(m_evolutionaryAlgorithm.GenomeList[0]);
 
             var voxels = new float[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
-            colorOutput = new Color[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
             meshFillOutput = new float[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
 
             for (int x = 0; x < m_voxelVolume.width; x++)
@@ -95,10 +90,12 @@ public class MeshEvolver : MonoBehaviour
                         inputArr[1] = Mathf.Abs((float)y / (m_voxelVolume.height - 1) * 2 - 1);
                         inputArr[2] = Mathf.Abs((float)z / (m_voxelVolume.length - 1) * 2 - 1);
 
-                        var sphereDistance = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 3f);
+                        var sphereDistance = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 3f, 
+                            new Vector3(m_voxelVolume.width / 2f, m_voxelVolume.height / 2f, m_voxelVolume.length / 2f));
 
                         var boxSize = new Vector3(6, m_voxelVolume.height / 6f, m_voxelVolume.length / 5f);
-                        var boxDistance = DistanceFunctions.BoxDistance(x, y, z, m_voxelVolume, boxSize);
+                        var boxDistance = DistanceFunctions.BoxDistance(x, y, z, m_voxelVolume, boxSize,
+                            new Vector3(m_voxelVolume.width / 2f, m_voxelVolume.height / 2f, m_voxelVolume.length / 2f));
 
                         switch (testType)
                         {
@@ -122,18 +119,12 @@ public class MeshEvolver : MonoBehaviour
 
                         // for smoother surfaces, don't modify output
 
-                        voxels[x, y, z] = (float)outputArr[0] > 0.3f ? 0f : 1f;
+                        voxels[x, y, z] = (float)outputArr[0];// > 0.3f ? 0f : 1f;
 
-                        meshFillOutput[x, y, z] = voxels[x, y, z];
+                        meshFillOutput[x, y, z] = (float)outputArr[0];
 
                         if(x == 0 || x == m_voxelVolume.width-1  || y == 0 || y == m_voxelVolume.height-1 || z == 0 || z == m_voxelVolume.length-1)
                                 voxels[x, y, z] = -1f;
-
-
-                        float r = 0f;//Mathf.Max(0, (float)outputArr[1]);
-                        float g = 0f;//Mathf.Max(0, (float)outputArr[2]);
-                        float b = 0f;//Mathf.Max(0, (float)outputArr[3]);
-                        colorOutput[x, y, z] = new Color(r * 2, g * 3, b * 4);
                     }
                 }
             }
@@ -149,66 +140,34 @@ public class MeshEvolver : MonoBehaviour
             Debug.Log("Max fill: " + maxFill);
             Debug.Log("Min fill: " + minFill);
 
+            if(Mathf.Approximately(minFill, maxFill)) return;
+
+            //MarchingCubes.SetTarget(minFill + (maxFill - minFill) /2f);
+
+            for (int index00 = 1; index00 < voxels.GetLength(0) - 1; index00++)
+                for (int index01 = 1; index01 < voxels.GetLength(1) - 1; index01++)
+                    for (int index02 = 1; index02 < voxels.GetLength(2) - 1; index02++)
+                    {
+                        if (Mathf.Approximately(meshFillOutput[0, 0, 0], maxFill))
+                            voxels[index00, index01, index02] = minFill + (maxFill - voxels[index00, index01, index02]);
+
+                        voxels[index00, index01, index02] = voxels[index00, index01, index02] < minFill + (maxFill - minFill) / 2f ? 0f : 1f;
+                    }
+
             Mesh mesh = MarchingCubes.CreateMesh(voxels);
 
-            List<Color> vertexColors = new List<Color>();
-	        foreach (var vertex in mesh.vertices)
-            {
-                var zeroBasedVertex = vertex + new Vector3(m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length);
-                vertexColors.Add(colorOutput[GetIndex(zeroBasedVertex.x), GetIndex(zeroBasedVertex.y), GetIndex(zeroBasedVertex.z)]);
-            }
-	        mesh.colors = vertexColors.ToArray();
-
 	        mesh.RecalculateNormals();
-	        if (mesh.vertices.Length > 0)
-	        {
-	            Vector3 furthestZVertex = mesh.vertices[0];
-	            foreach (var vertex in mesh.vertices)
-	            {
-	                if (vertex.z > furthestZVertex.z)
-	                    furthestZVertex = vertex;
-	            }
-	            Debug.Log(mesh.normals[mesh.vertices.ToList().IndexOf(furthestZVertex)].z > 0);
-	        }
 
 	        //The diffuse shader wants uvs so just fill with a empty array, they're not actually used
 	        mesh.uv = new Vector2[mesh.vertices.Length];
+            // optimize mesh to it renders faster
 	        mesh.Optimize();
-
+            // destroy mesh object to free up memory
             GameObject.DestroyImmediate(m_meshGameObject.GetComponent<MeshFilter>().mesh);
-            m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
-	        
+
+            m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;        
 	    }
 	}
-
-    [ContextMenu("Flip winding order")]
-    void InvertWindingOrder()
-    {
-        Mesh mesh = m_meshGameObject.GetComponent<MeshFilter>().mesh;
-        int[] triangles = mesh.triangles;
-        for (int i = 0; i < triangles.Length; i += 3)
-        {
-            int temp = triangles[i + 1];
-            triangles[i + 1] = triangles[i + 2];
-            triangles[i + 2] = temp;
-        }
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
-    }
-
-    private int GetIndex(float value)
-    {
-        return Mathf.Abs(Mathf.RoundToInt(value))%(m_voxelVolume.width - 1);
-    }
-
-    private IEnumerator RotateMesh()
-    {
-        while (true)
-        {
-            m_meshGameObject.transform.Rotate(Vector3.up, RotationSpeed * Time.deltaTime, Space.World);
-            yield return null;
-        }    
-    }
 
     private void OnDrawGizmos()
     {

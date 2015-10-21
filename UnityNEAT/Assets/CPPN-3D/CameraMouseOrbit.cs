@@ -15,6 +15,7 @@ public class CameraMouseOrbit : MonoBehaviour
     public float distanceMax = 15f;
 
     private Rigidbody rigidbody;
+    private bool isPaused = false;
 
     float x = 0.0f;
     float y = 0.0f;
@@ -35,8 +36,16 @@ public class CameraMouseOrbit : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+            isPaused = !isPaused;
+    }
+
     void LateUpdate()
     {
+        if(isPaused) return;
+
         if (target)
         {
             x += Input.GetAxis("Mouse X") * xSpeed * distance * 0.02f;
