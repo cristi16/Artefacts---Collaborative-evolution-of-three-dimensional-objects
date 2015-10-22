@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 using System.Xml;
 using SharpNeat.EvolutionAlgorithms;
@@ -71,7 +72,14 @@ public class MeshEvolver : MonoBehaviour
 	    if (Input.GetKey(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow))
 	    {
 	        m_evolutionaryAlgorithm.EvolveOneStep();
-	        var phenom = m_experiment.GenomeDecoder.Decode(m_evolutionaryAlgorithm.GenomeList[0]);
+
+            //var doc = NeatGenomeXmlIO.Save(m_evolutionaryAlgorithm.GenomeList[0], true);
+            //var byteCount = System.Text.ASCIIEncoding.ASCII.GetByteCount(doc.OuterXml);
+            //Debug.LogWarning("Byte count: " + byteCount);
+
+            //NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(doc.OuterXml)), true);         
+
+            var phenom = m_experiment.GenomeDecoder.Decode(m_evolutionaryAlgorithm.GenomeList[0]);
 
             var voxels = new float[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
             meshFillOutput = new float[m_voxelVolume.width, m_voxelVolume.height, m_voxelVolume.length];
