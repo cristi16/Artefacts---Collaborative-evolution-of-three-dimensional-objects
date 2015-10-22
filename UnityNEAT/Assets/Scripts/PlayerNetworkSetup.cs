@@ -13,8 +13,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
         GetComponent<FirstPersonController>().enabled = true;
         GetComponentInChildren<Camera>().enabled = true;
         GetComponentInChildren<AudioListener>().enabled = true;
-
-        
     }
 
     void Update()
@@ -23,6 +21,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
         {
             if(Input.GetKeyDown(KeyCode.R))
                 CmdSpawnSphere();
+            if (Input.GetKeyDown(KeyCode.F))
+                GetComponent<FirstPersonController>().Freeze = !GetComponent<FirstPersonController>().Freeze;
         }
     }
 
@@ -30,6 +30,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public void CmdSpawnSphere()
     {
         var instance = Instantiate(go);
-        NetworkServer.Spawn(instance);
+        NetworkServer.SpawnWithClientAuthority(instance, connectionToClient);
     }
 }
