@@ -160,13 +160,13 @@ public class MeshEvolver : MonoBehaviour
                     }
 
             Mesh mesh = MarchingCubes.CreateMesh(voxels);
-
+            Debug.Log("vertex count: " + mesh.vertexCount);
 	        mesh.RecalculateNormals();
 
 	        //The diffuse shader wants uvs so just fill with a empty array, they're not actually used
 	        mesh.uv = new Vector2[mesh.vertices.Length];
             // optimize mesh to it renders faster
-	        mesh.Optimize();
+	        //mesh.Optimize();
             // destroy mesh object to free up memory
             GameObject.DestroyImmediate(m_meshGameObject.GetComponent<MeshFilter>().mesh);
 
