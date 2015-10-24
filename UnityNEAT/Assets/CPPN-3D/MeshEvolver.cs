@@ -65,9 +65,11 @@ public class MeshEvolver : MonoBehaviour
     void InteractiveEvolutionListener()
     {
         Debug.Log("Current generation: " + m_evolutionaryAlgorithm.CurrentGeneration);
+        Debug.Log("Connections: " + (m_evolutionaryAlgorithm.GenomeList[0].ConnectionGeneList.Count));
+        Debug.Log("Neurons: " + (m_evolutionaryAlgorithm.GenomeList[0].NeuronGeneList.Count));
     }
 
-	void Update () 
+    void Update () 
 	{
 	    if (Input.GetKey(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow))
 	    {
@@ -95,8 +97,10 @@ public class MeshEvolver : MonoBehaviour
                         inputArr[1] = Mathf.Abs((float)y / (m_voxelVolume.height - 1) * 2 - 1);
                         inputArr[2] = Mathf.Abs((float)z / (m_voxelVolume.length - 1) * 2 - 1);
 
-                        var sphereDistance = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 3f, 
-                            new Vector3(m_voxelVolume.width / 2f, m_voxelVolume.height / 2f, m_voxelVolume.length / 2f));
+                        var sphereDistance = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 4f, 
+                            new Vector3(m_voxelVolume.width / 4f, m_voxelVolume.height / 2f, m_voxelVolume.length / 2f));
+                        var sphereDistance2 = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 4f,
+                            new Vector3(m_voxelVolume.width - m_voxelVolume.width / 4f, m_voxelVolume.height * 0.75f, m_voxelVolume.length / 2f));
 
                         var boxSize = new Vector3(6, m_voxelVolume.height / 6f, m_voxelVolume.length / 5f);
                         var boxDistance = DistanceFunctions.BoxDistance(x, y, z, m_voxelVolume, boxSize,
@@ -160,7 +164,6 @@ public class MeshEvolver : MonoBehaviour
                     }
 
             Mesh mesh = MarchingCubes.CreateMesh(voxels);
-            Debug.Log("vertex count: " + mesh.vertexCount);
 	        mesh.RecalculateNormals();
 
 	        //The diffuse shader wants uvs so just fill with a empty array, they're not actually used
