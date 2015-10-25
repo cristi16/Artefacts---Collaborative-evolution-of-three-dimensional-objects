@@ -99,8 +99,6 @@ public class MeshEvolver : MonoBehaviour
 
                         var sphereDistance = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 4f, 
                             new Vector3(m_voxelVolume.width / 4f, m_voxelVolume.height / 2f, m_voxelVolume.length / 2f));
-                        var sphereDistance2 = DistanceFunctions.SphereDistance(x, y, z, m_voxelVolume, m_voxelVolume.width / 4f,
-                            new Vector3(m_voxelVolume.width - m_voxelVolume.width / 4f, m_voxelVolume.height * 0.75f, m_voxelVolume.length / 2f));
 
                         var boxSize = new Vector3(6, m_voxelVolume.height / 6f, m_voxelVolume.length / 5f);
                         var boxDistance = DistanceFunctions.BoxDistance(x, y, z, m_voxelVolume, boxSize,
@@ -188,7 +186,6 @@ public class MeshEvolver : MonoBehaviour
             Gizmos.DrawWireCube(Vector3.zero, new Vector3(7 * 2, m_voxelVolume.height / 3f, m_voxelVolume.length / 2.5f));
 
             var color = Color.cyan;
-            ;
             color.a = 0.5f;
             Gizmos.color = color;
             Gizmos.DrawSphere(Vector3.zero, m_voxelVolume.width / 3f);

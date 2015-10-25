@@ -24,8 +24,6 @@ public class MeshEvolutionExperiment
     string _name;
     int _populationSize;
     NetworkActivationScheme _activationScheme;
-    string _complexityRegulationStr;
-    int? _complexityThreshold;
     string _description;
     int _inputCount;
     int _outputCount;
@@ -87,8 +85,6 @@ public class MeshEvolutionExperiment
         _name = name;
         _populationSize = XmlUtils.GetValueAsInt(xmlConfig, "PopulationSize");
         _activationScheme = ExperimentUtils.CreateActivationScheme(xmlConfig, "Activation");
-        _complexityRegulationStr = XmlUtils.TryGetValueAsString(xmlConfig, "ComplexityRegulationStrategy");
-        _complexityThreshold = XmlUtils.TryGetValueAsInt(xmlConfig, "ComplexityThreshold");
         _description = XmlUtils.TryGetValueAsString(xmlConfig, "Description");
 
         _eaParams = new NeatEvolutionAlgorithmParameters();
@@ -164,9 +160,7 @@ public class MeshEvolutionExperiment
     {
         _genomeDecoder = CreateGenomeDecoder();
 
-        IComplexityRegulationStrategy complexityRegulationStrategy = ExperimentUtils.CreateComplexityRegulationStrategy(_complexityRegulationStr, _complexityThreshold);
-
-        var ea = new NeatInteractiveEvolutionAlgorithm< NeatGenome>(_eaParams, complexityRegulationStrategy);
+        var ea = new NeatInteractiveEvolutionAlgorithm< NeatGenome>(_eaParams);
 
         ea.Initialize(genomeList);
 

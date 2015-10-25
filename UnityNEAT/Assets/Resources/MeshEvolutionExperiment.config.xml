@@ -5,8 +5,6 @@
       <Activation>
         <Scheme>Acyclic</Scheme>
       </Activation>
-      <ComplexityRegulationStrategy>Absolute</ComplexityRegulationStrategy>
-      <ComplexityThreshold>10</ComplexityThreshold>
       <Description>
         Interactive evolution of a 3D mesh
       </Description>

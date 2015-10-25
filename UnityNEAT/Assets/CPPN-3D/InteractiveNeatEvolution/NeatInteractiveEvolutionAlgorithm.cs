@@ -20,14 +20,9 @@ namespace SharpNeat.EvolutionAlgorithms
         where TGenome : class, IGenome<TGenome>
     {
         NeatEvolutionAlgorithmParameters _eaParams;
-        readonly NeatEvolutionAlgorithmParameters _eaParamsComplexifying;
-        readonly NeatEvolutionAlgorithmParameters _eaParamsSimplifying;
 
         readonly FastRandom _rng = new FastRandom();
         readonly NeatAlgorithmStats _stats;
-
-        ComplexityRegulationMode _complexityRegulationMode;
-        readonly IComplexityRegulationStrategy _complexityRegulationStrategy;
 
         #region Constructors
 
@@ -37,27 +32,16 @@ namespace SharpNeat.EvolutionAlgorithms
         public NeatInteractiveEvolutionAlgorithm()
         {
             _eaParams = new NeatEvolutionAlgorithmParameters();
-            _eaParamsComplexifying = _eaParams;
-            _eaParamsSimplifying = _eaParams.CreateSimplifyingParameters();
             _stats = new NeatAlgorithmStats(_eaParams);
-
-            _complexityRegulationMode = ComplexityRegulationMode.Complexifying;
-            _complexityRegulationStrategy = new NullComplexityRegulationStrategy();
         }
 
         /// <summary>
         /// Constructs with the provided NeatEvolutionAlgorithmParameters and ISpeciationStrategy.
         /// </summary>
-        public NeatInteractiveEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams,
-                                      IComplexityRegulationStrategy complexityRegulationStrategy)
+        public NeatInteractiveEvolutionAlgorithm(NeatEvolutionAlgorithmParameters eaParams)
         {
             _eaParams = eaParams;
-            _eaParamsComplexifying = _eaParams;
-            _eaParamsSimplifying = _eaParams.CreateSimplifyingParameters();
             _stats = new NeatAlgorithmStats(_eaParams);
-
-            _complexityRegulationMode = ComplexityRegulationMode.Complexifying;
-            _complexityRegulationStrategy = complexityRegulationStrategy;
         }
 
         #endregion
@@ -78,14 +62,6 @@ namespace SharpNeat.EvolutionAlgorithms
         public NeatAlgorithmStats Statistics
         {
             get { return _stats; }
-        }
-
-        /// <summary>
-        /// Gets the current complexity regulation mode.
-        /// </summary>
-        public ComplexityRegulationMode ComplexityRegulationMode
-        {
-            get { return _complexityRegulationMode; }
         }
 
         #endregion
@@ -135,19 +111,6 @@ namespace SharpNeat.EvolutionAlgorithms
             // Update stats and store reference to best genome.
             UpdateStats();
 
-            // Determine the complexity regulation mode and switch over to the appropriate set of evolution
-            // algorithm parameters. Also notify the genome factory to allow it to modify how it creates genomes
-            // (e.g. reduce or disable additive mutations).
-            _complexityRegulationMode = _complexityRegulationStrategy.DetermineMode(_stats);
-            switch (_complexityRegulationMode)
-            {
-                case ComplexityRegulationMode.Complexifying:
-                    _eaParams = _eaParamsComplexifying;
-                    break;
-                case ComplexityRegulationMode.Simplifying:
-                    _eaParams = _eaParamsSimplifying;
-                    break;
-            }
             yield return null;
         }
 
