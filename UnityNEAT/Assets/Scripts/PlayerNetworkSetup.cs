@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Text;
 using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -19,10 +20,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            if(Input.GetKeyDown(KeyCode.R))
+            if (Input.GetKeyDown(KeyCode.R))
                 CmdSpawnSphere();
             if (Input.GetKeyDown(KeyCode.F))
-                GetComponent<FirstPersonController>().Freeze = !GetComponent<FirstPersonController>().Freeze;
+                GetComponent<FirstPersonController>().IsFrozen = !GetComponent<FirstPersonController>().IsFrozen;
         }
     }
 
@@ -30,6 +31,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public void CmdSpawnSphere()
     {
         var instance = Instantiate(go);
-        NetworkServer.SpawnWithClientAuthority(instance, connectionToClient);
+
+        var sb = new StringBuilder();
+        for (int i = 0; i < 30000; i++)
+            sb.Append("a");
+
+        instance.GetComponent<DummySphere>().dummyString = sb.ToString();
+        NetworkServer.Spawn(instance);
     }
 }

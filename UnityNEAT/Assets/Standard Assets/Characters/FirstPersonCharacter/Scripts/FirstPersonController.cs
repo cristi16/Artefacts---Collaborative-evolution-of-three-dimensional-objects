@@ -10,7 +10,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
-        public bool Freeze { get; set; }
+        public bool IsFrozen { get; set; }
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
@@ -62,7 +62,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         // Update is called once per frame
         private void Update()
         {
-            if(Freeze) return;
+            if(IsFrozen) return;
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -97,7 +97,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
-            if(Freeze) return;
+            if(IsFrozen) return;
 
             float speed;
             GetInput(out speed);

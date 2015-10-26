@@ -5,6 +5,9 @@ using UnityEngine.Networking;
 
 public class DummySphere : NetworkBehaviour
 {
+    [SyncVar]
+    public string dummyString;
+
     public override void OnStartClient()
     {
         base.OnStartClient();
