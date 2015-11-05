@@ -147,7 +147,13 @@ public class MeshEvolver : MonoBehaviour
             Debug.Log("Max fill: " + maxFill);
             Debug.Log("Min fill: " + minFill);
 
-            if(Mathf.Approximately(minFill, maxFill)) return;
+            // TODO: need to find a workaround for this. It results in cubes. In multiplayer we don't want to spawn cubes as seeds.
+            // Either save network to disk, look and see what's wrong or maybe if this happens on the client it could request another regeneration.
+	        if (Mathf.Approximately(minFill, maxFill))
+	        {
+                Debug.LogError("Min equals max");
+	            return;
+	        }
 
             //MarchingCubes.SetTarget(minFill + (maxFill - minFill) /2f);
 
@@ -162,10 +168,10 @@ public class MeshEvolver : MonoBehaviour
                     }
 
             Mesh mesh = MarchingCubes.CreateMesh(voxels);
-	        mesh.RecalculateNormals();
+	    mesh.RecalculateNormals();
 
-	        //The diffuse shader wants uvs so just fill with a empty array, they're not actually used
-	        mesh.uv = new Vector2[mesh.vertices.Length];
+	    //The diffuse shader wants uvs so just fill with a empty array, they're not actually used
+	    mesh.uv = new Vector2[mesh.vertices.Length];
             // optimize mesh to it renders faster
 	        //mesh.Optimize();
             // destroy mesh object to free up memory
