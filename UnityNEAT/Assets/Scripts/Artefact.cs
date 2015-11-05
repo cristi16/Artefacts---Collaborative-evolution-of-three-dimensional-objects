@@ -51,8 +51,13 @@ public class Artefact : NetworkBehaviour
         gameObject.AddComponent<MeshRenderer>();
         gameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
         gameObject.AddComponent<ProceduralMesh>();
-        gameObject.AddComponent<MeshCollider>().convex = true;
+
+        var concaveCollider = gameObject.AddComponent<ConcaveCollider>();
+        concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
+        concaveCollider.ComputeHulls(null, null);
+
         gameObject.AddComponent<Rigidbody>();
         gameObject.transform.localScale = Vector3.one*0.2f;
+        gameObject.transform.position = Vector3.up*10f;
     }
 }

@@ -3,7 +3,7 @@ using System.Collections;
 
 public class ProceduralMesh : MonoBehaviour
 {
-    public bool showGizmos = true; 
+    public bool showGizmos = false; 
 
     void Start()
     {
