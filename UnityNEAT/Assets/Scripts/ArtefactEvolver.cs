@@ -11,12 +11,14 @@ public class ArtefactEvolver : NetworkBehaviour
     private EvolutionHelper evolutionHelper;
     // unique identifier used to locate genome is network id of Artefact
     private Dictionary<int, NeatGenome> genomeDictionary;
+    private const int k_numberOfInputs = 4;
+    private const int k_numberOfOutputs = 1;
 
     public override void OnStartServer()
     {
         base.OnStartServer();
 
-        evolutionHelper = new EvolutionHelper(4, 1);
+        evolutionHelper = new EvolutionHelper(k_numberOfInputs, k_numberOfOutputs);
 
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();

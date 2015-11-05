@@ -1,14 +1,12 @@
-using System;
-using System.IO;
 using UnityEngine;
 using System.Xml;
+using SharpNeat.Decoders;
+using SharpNeat.Decoders.Neat;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
-using SharpNeat.Phenomes;
 
 public class MeshEvolver : MonoBehaviour
 {
-
     public ArtefactEvaluator.VoxelVolume m_voxelVolume;
     public ArtefactEvaluator.InputType InputType;
     public bool showGizmos = false;
@@ -17,24 +15,17 @@ public class MeshEvolver : MonoBehaviour
     private const int k_numberOfInputs = 4;
     private const int k_numberOfOutputs = 1;
 
-    private MeshEvolutionExperiment m_experiment;
-    private NeatInteractiveEvolutionAlgorithm<NeatGenome> m_evolutionaryAlgorithm;
-
     private GameObject m_meshGameObject;
-    ArtefactEvaluator.EvaluationInfo evaluationInfo;
+    private EvolutionHelper evolutionHelper;
+    private NeatGenome currentGenome;
+    private NeatGenomeDecoder genomeDecoder;
+    private ArtefactEvaluator.EvaluationInfo evaluationInfo;
 
     void Start () 
-	{
-	    m_experiment = new MeshEvolutionExperiment();
-        
-	    XmlDocument xmlConfig = new XmlDocument();
-	    TextAsset textAsset = (TextAsset)Resources.Load("MeshEvolutionExperiment.config");
-	    xmlConfig.LoadXml(textAsset.text);
-	    m_experiment.Initialize("Mesh Evolution", xmlConfig.DocumentElement, k_numberOfInputs, k_numberOfOutputs);
-
-	    m_evolutionaryAlgorithm = m_experiment.CreateEvolutionAlgorithm(1);
-	    m_evolutionaryAlgorithm.UpdateEvent = InteractiveEvolutionListener;
-
+	{ 
+        evolutionHelper = new EvolutionHelper(k_numberOfInputs, k_numberOfOutputs);
+        currentGenome = evolutionHelper.CreateInitialGenome();
+        genomeDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
 
         m_meshGameObject = new GameObject("Mesh");
         m_meshGameObject.AddComponent<MeshFilter>();
@@ -49,22 +40,15 @@ public class MeshEvolver : MonoBehaviour
         ArtefactEvaluator.DefaultInputType = InputType;
     }
 
-    void InteractiveEvolutionListener()
-    {
-        Debug.Log("Current generation: " + m_evolutionaryAlgorithm.CurrentGeneration);
-        Debug.Log("Connections: " + (m_evolutionaryAlgorithm.GenomeList[0].ConnectionGeneList.Count));
-        Debug.Log("Neurons: " + (m_evolutionaryAlgorithm.GenomeList[0].NeuronGeneList.Count));
-    }
-
     void Update () 
 	{
 	    if (Input.GetKey(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow))
 	    {
-	        m_evolutionaryAlgorithm.EvolveOneStep();
+	        currentGenome = evolutionHelper.MutateGenome(currentGenome);
+            Debug.Log("Current generation: " + currentGenome.BirthGeneration);
 
-            var phenome = m_experiment.GenomeDecoder.Decode(m_evolutionaryAlgorithm.GenomeList[0]);
-
-	        
+            var phenome = genomeDecoder.Decode(currentGenome);
+        
 	        Mesh mesh = ArtefactEvaluator.Evaluate(phenome, m_voxelVolume, out evaluationInfo);
 
 	        mesh.RecalculateNormals();

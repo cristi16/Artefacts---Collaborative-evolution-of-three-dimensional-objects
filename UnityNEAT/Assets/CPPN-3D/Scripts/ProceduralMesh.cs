@@ -18,6 +18,7 @@ public class ProceduralMesh : MonoBehaviour
         var normals = GetComponent<MeshFilter>().mesh.normals;
 
         Gizmos.color = Color.green;
+        Gizmos.matrix = transform.localToWorldMatrix;
 
         for (int i = 0; i < vertices.Length; i++)
         {
