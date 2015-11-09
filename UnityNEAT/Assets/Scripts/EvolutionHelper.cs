@@ -3,7 +3,7 @@ using SharpNeat.Genomes.HyperNeat;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Network;
 
-public class EvolutionHelper 
+public class EvolutionHelper
 {
     public static int InputCount { get; private set; }
     public static int OutputCount { get; private set; }

@@ -7,7 +7,6 @@ using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Genomes.Neat;
-using SharpNeat.Phenomes;
 using UnityEngine.Networking;
 
 public class Artefact : NetworkBehaviour
@@ -20,7 +19,7 @@ public class Artefact : NetworkBehaviour
     {
         base.OnStartClient();
 
-        if (SerializedGenome == String.Empty)
+        if (SerializedGenome == string.Empty)
         {
             Debug.LogError("Spawned artefact without genome!");
         }
@@ -56,8 +55,6 @@ public class Artefact : NetworkBehaviour
         concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
         concaveCollider.ComputeHulls(null, null);
 
-        gameObject.AddComponent<Rigidbody>();
-        gameObject.transform.localScale = Vector3.one*0.2f;
-        gameObject.transform.position = Vector3.up*10f;
+        gameObject.AddComponent<Rigidbody>().mass = 100f;
     }
 }
