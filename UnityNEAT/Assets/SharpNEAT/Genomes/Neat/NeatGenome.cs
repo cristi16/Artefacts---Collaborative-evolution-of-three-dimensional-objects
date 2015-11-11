@@ -265,7 +265,8 @@ namespace SharpNeat.Genomes.Neat
             // networks into account.
 
             CorrelationResults correlationResults = CorrelateConnectionGeneLists(_connectionGeneList, parent._connectionGeneList);
-            Debug.Assert(correlationResults.PerformIntegrityCheck(), "CorrelationResults failed integrity check.");
+            if(correlationResults.PerformIntegrityCheck() == false)
+                UnityEngine.Debug.LogError("CorrelationResults failed integrity check.");
 
             // Construct a ConnectionGeneListBuilder with its capacity set the the maximum number of connections that
             // could be added to it (all connection genes from both parents). This eliminates the possiblity of having to

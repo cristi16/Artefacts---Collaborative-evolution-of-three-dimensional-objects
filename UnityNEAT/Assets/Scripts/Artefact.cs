@@ -49,6 +49,7 @@ public class Artefact : NetworkBehaviour
         gameObject.AddComponent<MeshFilter>().mesh = mesh;
         gameObject.AddComponent<MeshRenderer>();
         gameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
+        gameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
         gameObject.AddComponent<ProceduralMesh>();
 
         var concaveCollider = gameObject.AddComponent<ConcaveCollider>();

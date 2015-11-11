@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using System.Xml;
 using SharpNeat.Decoders;
@@ -13,7 +14,7 @@ public class MeshEvolver : MonoBehaviour
     public bool showNeatOutput;
 
     private const int k_numberOfInputs = 4;
-    private const int k_numberOfOutputs = 1;
+    private const int k_numberOfOutputs = 4;
 
     private GameObject m_meshGameObject;
     private EvolutionHelper evolutionHelper;
@@ -54,10 +55,11 @@ public class MeshEvolver : MonoBehaviour
 	        mesh.RecalculateNormals();
 	        //The diffuse shader wants uvs so just fill with a empty array, they're not actually used
 	        mesh.uv = new Vector2[mesh.vertices.Length];
-            // destroy mesh object to free up memory
-            GameObject.DestroyImmediate(m_meshGameObject.GetComponent<MeshFilter>().mesh);
+	        // destroy mesh object to free up memory
+	        GameObject.DestroyImmediate(m_meshGameObject.GetComponent<MeshFilter>().mesh);
 
-            m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;        
+	        m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
+	        m_meshGameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
 	    }
 	}
 

@@ -28,6 +28,7 @@ public class ArtefactEvaluator
     #endregion Data structs
 
     public static InputType DefaultInputType = InputType.DistanceToCenter;
+    public static Color artefactColor;
 
     public static Mesh Evaluate(IBlackBox phenome, VoxelVolume volume, out EvaluationInfo evaluationInfo)
     {
@@ -35,6 +36,8 @@ public class ArtefactEvaluator
         var cleanOutput = new float[volume.width, volume.height, volume.length];
         var minOutputValue = 1f;
         var maxOutputValue = -1f;
+
+        float r = 0, g = 0, b = 0;
 
         for (int x = 0; x < volume.width; x++)
         {
@@ -52,6 +55,10 @@ public class ArtefactEvaluator
                     processedOutput[x, y, z] = (float)outputArr[0];
                     cleanOutput[x, y, z] = (float)outputArr[0];
 
+                    r += (float) outputArr[1];
+                    g += (float) outputArr[2];
+                    b += (float) outputArr[3];
+
                     // store min and max output values
                     if (processedOutput[x, y, z] < minOutputValue)
                         minOutputValue = processedOutput[x, y, z];
@@ -64,6 +71,12 @@ public class ArtefactEvaluator
                 }
             }
         }
+
+        r /= volume.width*volume.width*volume.width;
+        g /= volume.width*volume.width*volume.width;
+        b /= volume.width*volume.width*volume.width;
+        artefactColor = new Color((r + 1f) / 2f, (g + 1f) / 2f, (b + 1f) / 2f);
+        Debug.Log(artefactColor);
 
         Debug.Log("Output in range [" + minOutputValue + ", " + maxOutputValue + "]");
 

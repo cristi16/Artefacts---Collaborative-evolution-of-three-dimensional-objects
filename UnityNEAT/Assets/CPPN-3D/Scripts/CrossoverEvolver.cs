@@ -6,10 +6,11 @@ using SharpNeat.Decoders.Neat;
 using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 
-public class SelectiveMeshEvolver : MonoBehaviour
+public class CrossoverEvolver : MonoBehaviour
 {
     public ArtefactEvaluator.VoxelVolume m_voxelVolume;
     public ArtefactEvaluator.InputType InputType;
+    public List<uint> generations = new List<uint>();
 
     private const int k_numberOfInputs = 4;
     private const int k_numberOfOutputs = 4;
@@ -20,7 +21,9 @@ public class SelectiveMeshEvolver : MonoBehaviour
     private NeatGenomeDecoder genomeDecoder;
     private ArtefactEvaluator.EvaluationInfo evaluationInfo;
     private List<NeatGenome> seeds = new List<NeatGenome>(); 
-    private List<GameObject> seedsGameObjects = new List<GameObject>(); 
+    private List<GameObject> seedsGameObjects = new List<GameObject>();
+
+    private List<int> selectedSeeds = new List<int>();
 
     void Start () 
 	{ 
@@ -28,8 +31,7 @@ public class SelectiveMeshEvolver : MonoBehaviour
         var intialGenome = evolutionHelper.CreateInitialGenome();
         genomeDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
 
-        parentGameObject = CreateGameObject("Parent");
-        //Camera.main.GetComponent<CameraMouseOrbit>().target = parentGameObject.transform;
+        //parentGameObject = CreateGameObject("Parent");
 
         for (int i = 0; i < numberOfChildren; i++)
         {
@@ -39,7 +41,7 @@ public class SelectiveMeshEvolver : MonoBehaviour
             seedsGameObjects.Add(child);
         }
 
-        SpawnParentAndSeeds(intialGenome);
+        SpawnSeeds(intialGenome);
 	}
 
     void OnValidate()
@@ -57,9 +59,67 @@ public class SelectiveMeshEvolver : MonoBehaviour
                 var index = seedsGameObjects.IndexOf(hitInfo.collider.gameObject);
                 if (index >= 0)
                 {
-                    SpawnParentAndSeeds(seeds[index]);
-                    Debug.Log("Current generation: " + seeds[index].BirthGeneration);
+                    selectedSeeds.Add(index);
+                    seedsGameObjects[index].GetComponent<Renderer>().material.color = Color.magenta;
+                    Debug.Log("Selected seed: " + (index + 1));
                 }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (selectedSeeds.Count == 0 || selectedSeeds.Count > 2)
+            {
+                foreach (var seedIndex in selectedSeeds)
+                    seedsGameObjects[seedIndex].GetComponent<Renderer>().material.color = Color.white;
+                selectedSeeds.Clear();
+                return;
+            }
+
+            if (selectedSeeds.Count == 1)
+            {
+                var index = selectedSeeds[0];
+                seeds[index] = seeds[index].CreateOffspring(seeds[index].BirthGeneration + 1);
+
+                CreateMesh(seeds[index], seedsGameObjects[index]);
+                Debug.Log("Mutated seed: " + (index + 1));
+            }
+
+            if (selectedSeeds.Count == 2)
+            {
+                var index1 = selectedSeeds[0];
+                var index2 = selectedSeeds[1];
+                var seed1 = seeds[index1];
+                var seed2 = seeds[index2];
+
+                seeds[index1] = seed1.CreateOffspring(seed2,
+                    (uint)Mathf.Max(seed1.BirthGeneration, seed2.BirthGeneration) + 1);
+                seeds[index2] = seed2.CreateOffspring(seed1,
+                    (uint)Mathf.Max(seed1.BirthGeneration, seed2.BirthGeneration) + 1);
+
+                CreateMesh(seeds[index1], seedsGameObjects[index1]);
+                CreateMesh(seeds[index2], seedsGameObjects[index2]);
+
+                Debug.Log("Crossover between seeds: " + (index1 + 1) + " and " + (index2 + 1));
+            }
+
+            foreach (var seedIndex in selectedSeeds)
+                seedsGameObjects[seedIndex].GetComponent<Renderer>().material.color = Color.white;
+            selectedSeeds.Clear();
+            generations.Clear();
+            for(int i = 0; i < seeds.Count; i++)
+                generations.Add(seeds[i].BirthGeneration);
+        }
+
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            generations.Clear();
+
+            for (int i = 0; i < seeds.Count; i++)
+            {
+                seeds[i] = seeds[i].CreateOffspring(seeds[i].BirthGeneration + 1);
+                CreateMesh(seeds[i], seedsGameObjects[i]);
+                generations.Add(seeds[i].BirthGeneration);
             }
         }
 	}
@@ -84,9 +144,9 @@ public class SelectiveMeshEvolver : MonoBehaviour
         attachedGameObject.AddComponent<MeshCollider>();
     }
 
-    void SpawnParentAndSeeds(NeatGenome parent)
+    void SpawnSeeds(NeatGenome parent)
     {
-        CreateMesh(parent, parentGameObject);
+        //CreateMesh(parent, parentGameObject);
 
         seeds.Clear();
         for (int i = 0; i < numberOfChildren; i++)

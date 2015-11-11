@@ -13,7 +13,7 @@ public class ArtefactEvolver : NetworkBehaviour
     // maps seed unique ID to seed genome
     private Dictionary<uint, NeatGenome> seedsDictionary = new Dictionary<uint, NeatGenome>();
     private const int k_numberOfInputs = 4;
-    private const int k_numberOfOutputs = 1;
+    private const int k_numberOfOutputs = 4;
     private const int k_numberOfSeeds = 5;
 
     private uint idCount;
