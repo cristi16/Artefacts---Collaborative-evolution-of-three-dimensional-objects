@@ -33,6 +33,7 @@ public class MeshEvolver : MonoBehaviour
         m_meshGameObject.AddComponent<MeshRenderer>();
         m_meshGameObject.AddComponent<ProceduralMesh>();
         m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
+        //m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Tri-Planar World"));
         Camera.main.GetComponent<CameraMouseOrbit>().target = m_meshGameObject.transform;
 	}
 
