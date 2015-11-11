@@ -1,9 +1,7 @@
 using System.Collections;
 using UnityEngine;
-using System.Xml;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
-using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 
 public class MeshEvolver : MonoBehaviour
@@ -12,6 +10,10 @@ public class MeshEvolver : MonoBehaviour
     public ArtefactEvaluator.InputType InputType;
     public bool showGizmos = false;
     public bool showNeatOutput;
+
+    public Material standardMaterial;
+    public Material triplanarTexturingMaterial;
+    public Material triplanarColoringMaterial;
 
     private const int k_numberOfInputs = 4;
     private const int k_numberOfOutputs = 4;
@@ -32,8 +34,7 @@ public class MeshEvolver : MonoBehaviour
         m_meshGameObject.AddComponent<MeshFilter>();
         m_meshGameObject.AddComponent<MeshRenderer>();
         m_meshGameObject.AddComponent<ProceduralMesh>();
-        m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
-        //m_meshGameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Tri-Planar World"));
+        m_meshGameObject.GetComponent<Renderer>().material = triplanarTexturingMaterial;
         Camera.main.GetComponent<CameraMouseOrbit>().target = m_meshGameObject.transform;
 	}
 
@@ -60,7 +61,7 @@ public class MeshEvolver : MonoBehaviour
 	        GameObject.DestroyImmediate(m_meshGameObject.GetComponent<MeshFilter>().mesh);
 
 	        m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
-	        m_meshGameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
+	        //m_meshGameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
 	    }
 	}
 

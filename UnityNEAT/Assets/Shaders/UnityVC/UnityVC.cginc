@@ -1,4 +1,4 @@
-﻿#ifndef UNITY_VC_INCLUDED
+#ifndef UNITY_VC_INCLUDED
 #define UNITY_VC_INCLUDED
 
 struct VertexInput_VC
@@ -121,9 +121,19 @@ half4 fragForwardBase_VC (VertexOutputForwardBase_VC i) : SV_Target
 	UnityGI gi = FragmentGI (
 		s.posWorld, occlusion, i.ambientOrLightmapUV, atten, s.oneMinusRoughness, s.normalWorld, s.eyeVec, mainLight);
 
+	if (abs(s.normalWorld.x) > 0.99)
+		s.diffColor *= fixed4(1, 0, 0, 1);
+	else if (abs(s.normalWorld.y) > 0.99)
+		s.diffColor *= fixed4(0, 1, 0, 1);
+	else if (abs(s.normalWorld.z) > 0.99)
+		s.diffColor *= fixed4(0, 0, 1, 1);
+	else
+		s.diffColor *= fixed4(1, 1, 0, 1);
+
 	half4 c = UNITY_BRDF_PBS (s.diffColor, s.specColor, s.oneMinusReflectivity, s.oneMinusRoughness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
 
-        c *= i.color;
+        //c *= i.color;
+
 
 	c.rgb += UNITY_BRDF_GI (s.diffColor, s.specColor, s.oneMinusReflectivity, s.oneMinusRoughness, s.normalWorld, -s.eyeVec, occlusion, gi);
 	c.rgb += Emission(i.tex.xy);
