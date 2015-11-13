@@ -52,9 +52,12 @@ public class Artefact : NetworkBehaviour
         gameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
         gameObject.AddComponent<ProceduralMesh>();
 
-        var concaveCollider = gameObject.AddComponent<ConcaveCollider>();
-        concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
-        concaveCollider.ComputeHulls(null, null);
+        // Concave collider generation is cool but it is incredibly slow at runtime, especially when generating them for multiple meshes at the same time. 
+        // This is also probably slow because our meshes have lots of vertices
+        //var concaveCollider = gameObject.AddComponent<ConcaveCollider>();
+        //concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
+        //concaveCollider.ComputeHulls(null, null);
+        gameObject.AddComponent<MeshCollider>().convex = true;
 
         gameObject.AddComponent<Rigidbody>().mass = 100f;
     }

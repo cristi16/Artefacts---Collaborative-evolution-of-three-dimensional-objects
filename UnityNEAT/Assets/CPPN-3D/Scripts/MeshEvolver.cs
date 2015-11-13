@@ -24,7 +24,7 @@ public class MeshEvolver : MonoBehaviour
     private NeatGenomeDecoder genomeDecoder;
     private ArtefactEvaluator.EvaluationInfo evaluationInfo;
 
-    void Start () 
+    void Start ()
 	{ 
         evolutionHelper = new EvolutionHelper(k_numberOfInputs, k_numberOfOutputs);
         currentGenome = evolutionHelper.CreateInitialGenome();
