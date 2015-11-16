@@ -20,7 +20,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         }
         else
         {
-            Cursor.visible = false;
+            //Cursor.visible = false;
             ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width/2f, Screen.height/2f, 0f));
         }
     }

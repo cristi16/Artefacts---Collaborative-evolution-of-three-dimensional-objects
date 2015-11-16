@@ -10,7 +10,9 @@ using SharpNeat.Genomes.Neat;
 using UnityEngine.Networking;
 
 public class Artefact : NetworkBehaviour
-{ 
+{
+    public Material artefactMaterial;
+
     [HideInInspector, SyncVar] public string SerializedGenome;
 
     private static ArtefactEvaluator.VoxelVolume m_voxelVolume = new ArtefactEvaluator.VoxelVolume() { width = 16, height = 16, length = 16 };
@@ -47,8 +49,7 @@ public class Artefact : NetworkBehaviour
         mesh.uv = new Vector2[mesh.vertices.Length];
 
         gameObject.AddComponent<MeshFilter>().mesh = mesh;
-        gameObject.AddComponent<MeshRenderer>();
-        gameObject.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
+        gameObject.AddComponent<MeshRenderer>().material = artefactMaterial;
         gameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
         gameObject.AddComponent<ProceduralMesh>();
 

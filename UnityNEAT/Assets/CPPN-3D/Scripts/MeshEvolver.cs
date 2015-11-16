@@ -34,7 +34,7 @@ public class MeshEvolver : MonoBehaviour
         m_meshGameObject.AddComponent<MeshFilter>();
         m_meshGameObject.AddComponent<MeshRenderer>();
         m_meshGameObject.AddComponent<ProceduralMesh>();
-        m_meshGameObject.GetComponent<Renderer>().material = triplanarTexturingMaterial;
+        m_meshGameObject.GetComponent<Renderer>().material = triplanarColoringMaterial;
         Camera.main.GetComponent<CameraMouseOrbit>().target = m_meshGameObject.transform;
 	}
 
