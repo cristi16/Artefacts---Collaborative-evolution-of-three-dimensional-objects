@@ -37,6 +37,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             collectedSeeds = new List<ArtefactSeed>();
 
             Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
         }
     }
 
@@ -66,6 +67,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 CmdSpawnSeed(collectedSeeds[scrollView.selectedIndex].ID, transform.position + transform.forward * 5f + transform.up * 5f);
+                
             }
         }
     }
@@ -74,5 +76,11 @@ public class PlayerNetworkSetup : NetworkBehaviour
     void CmdSpawnSeed(uint seedID, Vector3 spawnPosition)
     {
         evolver.SpawnSeed(seedID, spawnPosition);
+    }
+
+    [Command]
+    void CmdDestroySeed(uint seedID)
+    {
+        //evolver
     }
 }
