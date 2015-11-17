@@ -27,13 +27,18 @@ public class ArtefactEvolver : NetworkBehaviour
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
 
-        SpawnArtefactWithSeeds(initialGenome);
+        SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5f);
     }
 
-    private void SpawnArtefactWithSeeds(NeatGenome genome)
+    public void SpawnSeed(uint seedID, Vector3 spawnPosition)
+    {
+        SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition);
+    }
+
+    private void SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition)
     {
         // Spawn Parent
-        var artefactInstance = CreateArtefactInstance<Artefact>(genome, artefactPrefab, Vector3.up*5f);
+        var artefactInstance = CreateArtefactInstance<Artefact>(genome, artefactPrefab, spawnPosition);
         NetworkServer.Spawn(artefactInstance.gameObject);
         // Spawn Seeds
         for(int i = 0; i < k_numberOfSeeds; i++)
@@ -41,7 +46,7 @@ public class ArtefactEvolver : NetworkBehaviour
             var seedGenome = evolutionHelper.MutateGenome(genome);
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
-            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, direction * 5f);
+            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, spawnPosition + direction * 5f);
             seedInstance.ID = GenerateSeedID();
 
             NetworkServer.Spawn(seedInstance.gameObject);
