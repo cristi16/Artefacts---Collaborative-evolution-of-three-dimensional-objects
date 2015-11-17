@@ -27,20 +27,31 @@ public class Artefact : NetworkBehaviour
         }
 
         // Deserialize genome
+        Profiler.BeginSample("Deserialize");
         var genome = NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(SerializedGenome)), true);
+        Profiler.EndSample();
+
         // we need to assign genome factory we used for creating the genome
-        genome.GenomeFactory = EvolutionHelper.CreateGenomeFactory();
+        Profiler.BeginSample("Create genome factory");
+        genome.GenomeFactory = EvolutionHelper.Instance.GenomeFactory;
+        Profiler.EndSample();
 
         // Decode phenome from genome
+        Profiler.BeginSample("Decode");
         var genomeDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
         var phenome = genomeDecoder.Decode(genome);
+        Profiler.EndSample();
 
         // Evaluate phenome using voxel grid and generate mesh using Marching Cubes algorithm
+        Profiler.BeginSample("Evaluation");
         ArtefactEvaluator.EvaluationInfo evaluationInfo;
         var mesh = ArtefactEvaluator.Evaluate(phenome, m_voxelVolume, out evaluationInfo);
+        Profiler.EndSample();
 
         // Add required components in order to render mesh
+        Profiler.BeginSample("Display");
         DisplayMesh(mesh);
+        Profiler.EndSample();
     }
 
     void DisplayMesh(Mesh mesh)

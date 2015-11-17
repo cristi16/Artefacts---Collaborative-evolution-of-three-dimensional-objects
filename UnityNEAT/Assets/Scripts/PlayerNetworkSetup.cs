@@ -63,7 +63,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
                 }
             }
-
+            
             if (Input.GetMouseButtonDown(1))
             {
                 CmdSpawnSeed(collectedSeeds[scrollView.selectedIndex].ID, transform.position + transform.forward * 5f + transform.up * 5f);

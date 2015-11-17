@@ -12,8 +12,6 @@ public class ArtefactEvolver : NetworkBehaviour
     private EvolutionHelper evolutionHelper;
     // maps seed unique ID to seed genome
     private Dictionary<uint, NeatGenome> seedsDictionary = new Dictionary<uint, NeatGenome>();
-    private const int k_numberOfInputs = 4;
-    private const int k_numberOfOutputs = 4;
     private const int k_numberOfSeeds = 5;
 
     private uint idCount;
@@ -22,7 +20,7 @@ public class ArtefactEvolver : NetworkBehaviour
     {
         base.OnStartServer();
 
-        evolutionHelper = new EvolutionHelper(k_numberOfInputs, k_numberOfOutputs);
+        evolutionHelper = EvolutionHelper.Instance;
 
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
