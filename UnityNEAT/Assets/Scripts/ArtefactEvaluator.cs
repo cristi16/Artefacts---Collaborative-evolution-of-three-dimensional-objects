@@ -76,9 +76,9 @@ public class ArtefactEvaluator
         g /= volume.width*volume.width*volume.width;
         b /= volume.width*volume.width*volume.width;
         artefactColor = new Color((r + 1f) / 2f, (g + 1f) / 2f, (b + 1f) / 2f);
-        Debug.Log(artefactColor);
+        //Debug.Log(artefactColor);
 
-        Debug.Log("Output in range [" + minOutputValue + ", " + maxOutputValue + "]");
+        //Debug.Log("Output in range [" + minOutputValue + ", " + maxOutputValue + "]");
 
         // TODO: need to find a workaround for this. It results in cubes. In multiplayer we don't want to spawn cubes as seeds.
         // Either save network to disk, look and see what's wrong or maybe if this happens on the client it could request another regeneration.
