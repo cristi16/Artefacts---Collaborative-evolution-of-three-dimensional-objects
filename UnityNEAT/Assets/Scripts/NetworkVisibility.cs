@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 // Attach this to objects that need their visibility updated as the player moves around
 [RequireComponent(typeof(NetworkIdentity))]
-public class NetworkVisbility : NetworkBehaviour
+public class NetworkVisibility : NetworkBehaviour
 {
 
     public List<NetworkConnection> playersObserving = new List<NetworkConnection>();

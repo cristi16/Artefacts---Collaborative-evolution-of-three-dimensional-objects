@@ -13,7 +13,7 @@ public class NetworkPlayerVisibility : NetworkBehaviour
     [SerializeField]
     private float visUpdateInterval = 2000; // Update time in ms
     private SphereCollider collider;
-    private List<NetworkVisbility> changedObjects = new List<NetworkVisbility>(); // Objects that have changed visibility
+    private List<NetworkVisibility> changedObjects = new List<NetworkVisibility>(); // Objects that have changed visibility
     private float visUpdateTime;
 
     void Awake()
@@ -37,7 +37,7 @@ public class NetworkPlayerVisibility : NetworkBehaviour
 
     void RebuildChangedObjects()
     {
-        foreach (NetworkVisbility net in changedObjects)
+        foreach (NetworkVisibility net in changedObjects)
         {
             net.networkIdentity.RebuildObservers(false);
         }
@@ -46,7 +46,7 @@ public class NetworkPlayerVisibility : NetworkBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        NetworkVisbility net = col.GetComponent<NetworkVisbility>();
+        NetworkVisibility net = col.GetComponent<NetworkVisibility>();
         if (net != null && connectionToClient != null)
         {
             net.playersObserving.Add(connectionToClient);
@@ -56,7 +56,7 @@ public class NetworkPlayerVisibility : NetworkBehaviour
 
     void OnTriggerExit(Collider col)
     {
-        NetworkVisbility net = col.GetComponent<NetworkVisbility>();
+        NetworkVisibility net = col.GetComponent<NetworkVisibility>();
         if (net != null && connectionToClient != null)
         {
             net.playersObserving.Remove(connectionToClient);
