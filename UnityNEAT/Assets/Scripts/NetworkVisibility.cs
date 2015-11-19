@@ -9,7 +9,7 @@ public class NetworkVisibility : NetworkBehaviour
 {
 
     public List<NetworkConnection> playersObserving = new List<NetworkConnection>();
-    public NetworkIdentity networkIdentity { get; set; }
+    public NetworkIdentity networkIdentity;
 
     void Awake()
     {
@@ -22,16 +22,12 @@ public class NetworkVisibility : NetworkBehaviour
         {
             observers.Add(net);
         }
-
-        SetVis(gameObject, playersObserving.Count > 0);
-
-        return false;
+        return true;
     }
 
     public override bool OnCheckObserver(NetworkConnection newObserver)
     {
-        SetVis(gameObject, false);
-        return true;
+        return false;
     }
 
     // called hiding and showing objects on the host
