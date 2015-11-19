@@ -29,6 +29,7 @@ public class MeshEvolver : MonoBehaviour
         evolutionHelper = new EvolutionHelper(k_numberOfInputs, k_numberOfOutputs);
         currentGenome = evolutionHelper.CreateInitialGenome();
         genomeDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
+        ArtefactEvaluator.DefaultInputType = InputType;
 
         m_meshGameObject = new GameObject("Mesh");
         m_meshGameObject.AddComponent<MeshFilter>();
@@ -37,11 +38,6 @@ public class MeshEvolver : MonoBehaviour
         m_meshGameObject.GetComponent<Renderer>().material = standardMaterial;
         Camera.main.GetComponent<CameraMouseOrbit>().target = m_meshGameObject.transform;
 	}
-
-    void OnValidate()
-    {
-        ArtefactEvaluator.DefaultInputType = InputType;
-    }
 
     void Update () 
 	{
