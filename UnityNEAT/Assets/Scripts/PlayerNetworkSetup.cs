@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using HighlightingSystem;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -26,7 +27,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
     {
         if (isLocalPlayer == false)
         {
-            GetComponent<CharacterController>().enabled = false;
             GetComponent<FirstPersonController>().enabled = false;
             GetComponentInChildren<Camera>().enabled = false;
             GetComponentInChildren<AudioListener>().enabled = false;
