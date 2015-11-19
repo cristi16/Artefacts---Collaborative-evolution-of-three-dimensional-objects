@@ -59,8 +59,7 @@ public class Artefact : NetworkBehaviour
         mesh.RecalculateNormals();
         mesh.uv = new Vector2[mesh.vertices.Length];
 
-        gameObject.AddComponent<MeshFilter>().mesh = mesh;
-        gameObject.AddComponent<MeshRenderer>().material = artefactMaterial;
+        gameObject.GetComponent<MeshFilter>().mesh = mesh;
         gameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
         gameObject.AddComponent<ProceduralMesh>();
 
@@ -70,7 +69,5 @@ public class Artefact : NetworkBehaviour
         //concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
         //concaveCollider.ComputeHulls(null, null);
         gameObject.AddComponent<MeshCollider>().convex = true;
-
-        gameObject.AddComponent<Rigidbody>().mass = 100f;
     }
 }
