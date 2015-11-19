@@ -106,7 +106,11 @@ public class ArtefactEvaluator
         evaluationInfo.maxOutputValue = maxOutputValue;
 
         // Apply marching cubes on processed output and return Mesh
-        return MarchingCubes.CreateMesh(processedOutput);
+        Profiler.BeginSample("MarchingCubes");
+        var mesh = MarchingCubes.CreateMesh(processedOutput);
+        Profiler.EndSample();
+
+        return mesh;
     }
 
     private static void AssingInput(IBlackBox phenome, VoxelVolume volume, int x, int y, int z)
