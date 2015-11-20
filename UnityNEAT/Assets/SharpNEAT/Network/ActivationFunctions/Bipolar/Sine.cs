@@ -19,6 +19,7 @@
 
 using System;
 using SharpNeat.Utility;
+using UnityEngine;
 
 namespace SharpNeat.Network
 {
@@ -31,6 +32,8 @@ namespace SharpNeat.Network
         /// Default instance provided as a public static field.
         /// </summary>
         public static readonly IActivationFunction __DefaultInstance = new Sine();
+
+        public AnimationCurve Curve { get; set; }
 
         /// <summary>
         /// Gets the unique ID of the function. Stored in network XML to identify which function a network or neuron 
@@ -70,7 +73,11 @@ namespace SharpNeat.Network
         /// </summary>
         public double Calculate(double x, double[] auxArgs)
         {
-            return Math.Sin(2.0 * x);
+            float clamped = (float) x % 1f;
+            if (clamped < 0f)
+                clamped += 1f;
+            return Curve.Evaluate(clamped); 
+            //return Math.Sin(2.0 * x);
         }
 
         /// <summary>

@@ -17,6 +17,7 @@
  * along with SharpNEAT.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Network;
 using SharpNeat.Utility;
@@ -94,6 +95,7 @@ namespace SharpNeat.Genomes.HyperNeat
                 default:
                 {
                     activationFnId = _activationFnLibrary.GetRandomFunction(_rng).Id;
+                    UnityEngine.Debug.LogWarning("Created neuron with activation fn: " + activationFnId);
                     break;
                 }
             }

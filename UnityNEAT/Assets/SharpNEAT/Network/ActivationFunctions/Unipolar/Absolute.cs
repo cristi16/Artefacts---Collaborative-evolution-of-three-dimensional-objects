@@ -19,6 +19,7 @@
 
 using System;
 using SharpNeat.Utility;
+using UnityEngine;
 
 namespace SharpNeat.Network
 {
@@ -31,6 +32,8 @@ namespace SharpNeat.Network
         /// Default instance provided as a public static field.
         /// </summary>
         public static readonly IActivationFunction __DefaultInstance = new Absolute();
+
+        public AnimationCurve Curve { get; set; }
 
         /// <summary>
         /// Gets the unique ID of the function. Stored in network XML to identify which function a network or neuron 

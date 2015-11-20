@@ -3,6 +3,7 @@ using UnityEngine;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Genomes.Neat;
+using SharpNeat.Network;
 
 public class MeshEvolver : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class MeshEvolver : MonoBehaviour
     public Material standardMaterial;
     public Material triplanarTexturingMaterial;
     public Material triplanarColoringMaterial;
+
+    public AnimationCurve sineCurve;
 
     private const int k_numberOfInputs = 4;
     private const int k_numberOfOutputs = 4;
@@ -31,6 +34,7 @@ public class MeshEvolver : MonoBehaviour
         genomeDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
         ArtefactEvaluator.DefaultInputType = InputType;
 
+        Sine.__DefaultInstance.Curve = sineCurve;
         m_meshGameObject = new GameObject("Mesh");
         m_meshGameObject.AddComponent<MeshFilter>();
         m_meshGameObject.AddComponent<MeshRenderer>();

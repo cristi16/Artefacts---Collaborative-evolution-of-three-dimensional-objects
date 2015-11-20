@@ -18,6 +18,7 @@
  */
 
 using SharpNeat.Utility;
+using UnityEngine;
 
 namespace SharpNeat.Network
 {
@@ -35,6 +36,8 @@ namespace SharpNeat.Network
     /// </summary>
     public interface IActivationFunction
     {
+        AnimationCurve Curve { get; set; }
+
         /// <summary>
         /// Gets the unique ID of the function. Stored in network XML to identify which function a network or neuron 
         /// is using.
