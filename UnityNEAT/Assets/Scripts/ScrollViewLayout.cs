@@ -47,7 +47,7 @@ public class ScrollViewLayout : MonoBehaviour
     public void Reset()
     {
         verticalPosition = 1;
-        selectedIndex = 0;
+        selectedIndex = transform.childCount - 1;
     }
 
     public void CenterOnItem(Transform target)

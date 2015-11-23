@@ -58,6 +58,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 if (Input.GetMouseButtonDown(0))
                 {
                     hitInfo.collider.transform.parent = scrollView.transform;
+                    hitInfo.collider.gameObject.layer = LayerMask.NameToLayer("UI");
                     scrollView.Reset();
 
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
