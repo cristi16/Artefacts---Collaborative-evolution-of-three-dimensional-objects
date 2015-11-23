@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Xml;
 using UnityEngine;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
@@ -11,6 +13,7 @@ public class MeshEvolver : MonoBehaviour
     public ArtefactEvaluator.InputType InputType;
     public bool showGizmos = false;
     public bool showNeatOutput;
+    public bool showDistanceToCenter;
 
     public Material standardMaterial;
     public Material triplanarTexturingMaterial;
@@ -19,7 +22,7 @@ public class MeshEvolver : MonoBehaviour
     public AnimationCurve sineCurve;
 
     private const int k_numberOfInputs = 4;
-    private const int k_numberOfOutputs = 4;
+    private const int k_numberOfOutputs = 1;
 
     private GameObject m_meshGameObject;
     private EvolutionHelper evolutionHelper;
@@ -34,7 +37,9 @@ public class MeshEvolver : MonoBehaviour
         genomeDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
         ArtefactEvaluator.DefaultInputType = InputType;
 
+        //SaveGenome();
         Sine.__DefaultInstance.Curve = sineCurve;
+
         m_meshGameObject = new GameObject("Mesh");
         m_meshGameObject.AddComponent<MeshFilter>();
         m_meshGameObject.AddComponent<MeshRenderer>();
@@ -51,7 +56,7 @@ public class MeshEvolver : MonoBehaviour
             Debug.Log("Current generation: " + currentGenome.BirthGeneration);
 
             var phenome = genomeDecoder.Decode(currentGenome);
-        
+            
 	        Mesh mesh = ArtefactEvaluator.Evaluate(phenome, m_voxelVolume, out evaluationInfo);
 
 	        mesh.RecalculateNormals();
@@ -62,8 +67,20 @@ public class MeshEvolver : MonoBehaviour
 
 	        m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
 	        //m_meshGameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
+
+            //SaveGenome();
 	    }
 	}
+
+    private void SaveGenome()
+    {
+        XmlWriterSettings _xwSettings = new XmlWriterSettings();
+        _xwSettings.Indent = true;
+        using (XmlWriter xw = XmlWriter.Create(Application.persistentDataPath + "/genome.gnm.xml", _xwSettings))
+        {
+            NeatGenomeXmlIO.WriteComplete(xw, currentGenome, true);
+        }
+    }
 
     private void OnDrawGizmos()
     {
@@ -93,6 +110,21 @@ public class MeshEvolver : MonoBehaviour
                         var fill = evaluationInfo.cleanOutput[i0, i1, i2];
                         Gizmos.color = new Color(fill - minFill, fill - minFill, fill - minFill)/(maxFill - minFill);
                         Gizmos.DrawWireCube(new Vector3(i0 - m_voxelVolume.width / 2f, i1 - m_voxelVolume.height / 2f, i2 - m_voxelVolume.length / 2f ), Vector3.one);
+                    }
+        }
+
+        if (showDistanceToCenter && evaluationInfo.distanceToCenter != null)
+        {
+            var minFill = 0f;
+            var maxFill = 1f;
+
+            for (int i0 = 0; i0 < evaluationInfo.distanceToCenter.GetLength(0); i0++)
+                for (int i1 = 0; i1 < evaluationInfo.distanceToCenter.GetLength(1); i1++)
+                    for (int i2 = 0; i2 < evaluationInfo.distanceToCenter.GetLength(2); i2++)
+                    {
+                        var fill = evaluationInfo.distanceToCenter[i0, i1, i2];
+                        Gizmos.color = new Color(fill - minFill, fill - minFill, fill - minFill) / (maxFill - minFill);
+                        Gizmos.DrawWireCube(new Vector3(i0 - m_voxelVolume.width / 2f, i1 - m_voxelVolume.height / 2f, i2 - m_voxelVolume.length / 2f), Vector3.one);
                     }
         }
     }

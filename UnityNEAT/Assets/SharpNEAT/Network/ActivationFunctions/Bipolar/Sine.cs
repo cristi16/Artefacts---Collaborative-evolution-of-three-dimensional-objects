@@ -73,11 +73,11 @@ namespace SharpNeat.Network
         /// </summary>
         public double Calculate(double x, double[] auxArgs)
         {
-            float clamped = (float) x % 1f;
-            if (clamped < 0f)
-                clamped += 1f;
-            return Curve.Evaluate(clamped); 
-            //return Math.Sin(2.0 * x);
+            //float clamped = (float) x % 1f;
+            //if (clamped < 0f)
+            //    clamped += 1f;
+            //return Curve.Evaluate(clamped); 
+            return Math.Sin(2.0 * x);
         }
 
         /// <summary>
