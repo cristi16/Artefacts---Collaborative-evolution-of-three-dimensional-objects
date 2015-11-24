@@ -133,8 +133,8 @@ public class MeshEvolutionExperiment
         }
         catch (Exception e1)
         {
-            Utility.Log(fileName + " Error loading genome from file!\nLoading aborted.\n"
-                                      + e1.Message + "\nJoe: " + fileName);
+            //Utility.Log(fileName + " Error loading genome from file!\nLoading aborted.\n"
+            //                          + e1.Message + "\nJoe: " + fileName);
 
             genomeList = genomeFactory.CreateGenomeList(_populationSize, 0);
 

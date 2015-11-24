@@ -54,6 +54,8 @@ public class MeshEvolver : MonoBehaviour
 	    {
 	        currentGenome = evolutionHelper.MutateGenome(currentGenome);
             Debug.Log("Current generation: " + currentGenome.BirthGeneration);
+            //var byteCount = System.Text.ASCIIEncoding.ASCII.GetByteCount(NeatGenomeXmlIO.Save(currentGenome, true).OuterXml);
+            //Debug.LogWarning("Byte count: " + byteCount);
 
             var phenome = genomeDecoder.Decode(currentGenome);
             
