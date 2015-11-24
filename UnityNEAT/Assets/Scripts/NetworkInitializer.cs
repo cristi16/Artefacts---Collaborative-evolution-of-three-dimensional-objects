@@ -66,7 +66,8 @@ public class NetworkInitializer : MonoBehaviour
 
     void Update()
     {
-        connectButton.interactable = nameField.text != string.Empty;
+        if(nameField.gameObject.activeSelf)
+            connectButton.interactable = nameField.text != string.Empty;
     }
 
     void OnMatchList(ListMatchResponse matchList)
@@ -83,8 +84,10 @@ public class NetworkInitializer : MonoBehaviour
 
     public void ConnectToServer()
     {
-        PlayerPrefs.SetString("PlayerName" , nameField.text);
-        networkManager.PlayerName = nameField.text;
+        if (PlayerPrefs.HasKey("PlayerName") == false)
+        { 
+            PlayerPrefs.SetString("PlayerName" , nameField.text);
+        }
         networkManager.StartClient();
     }
 }

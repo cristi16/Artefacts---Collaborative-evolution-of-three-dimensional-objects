@@ -17,6 +17,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     private List<ArtefactSeed> collectedSeeds;
 
+    private string PlayerName;
+
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -30,6 +32,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             GetComponent<FirstPersonController>().enabled = false;
             GetComponentInChildren<Camera>().enabled = false;
             GetComponentInChildren<AudioListener>().enabled = false;
+
         }
         else
         {
@@ -38,6 +41,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
+
+            PlayerName = PlayerPrefs.GetString("PlayerName");
+            gameObject.name = PlayerName;
+
         }
     }
 
@@ -68,7 +75,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 CmdSpawnSeed(collectedSeeds[scrollView.selectedIndex].ID, transform.position + transform.forward * 5f + transform.up * 5f);
-                
             }
         }
     }
