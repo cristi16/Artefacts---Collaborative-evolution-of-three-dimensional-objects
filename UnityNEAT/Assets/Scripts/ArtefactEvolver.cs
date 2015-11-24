@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 using SharpNeat.Genomes.Neat;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -15,10 +18,16 @@ public class ArtefactEvolver : NetworkBehaviour
     private const int k_numberOfSeeds = 5;
 
     private uint idCount;
+    private string serverStartTime;
+    private string savePath;
 
     public override void OnStartServer()
     {
         base.OnStartServer();
+
+        serverStartTime = DateTime.Now.ToString("dd.MM.yy-hh.mm");
+        savePath = Application.persistentDataPath + "/" + serverStartTime;
+        Directory.CreateDirectory(savePath);
 
         evolutionHelper = EvolutionHelper.Instance;
 
@@ -31,6 +40,7 @@ public class ArtefactEvolver : NetworkBehaviour
     public void SpawnSeed(uint seedID, Vector3 spawnPosition)
     {
         SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition);
+        SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
     }
 
     private void SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition)
@@ -70,5 +80,15 @@ public class ArtefactEvolver : NetworkBehaviour
     private uint GenerateSeedID()
     {
         return ++idCount;
+    }
+
+    private void SaveGenome(NeatGenome genome , string fileName)
+    {
+        XmlWriterSettings _xwSettings = new XmlWriterSettings();
+        _xwSettings.Indent = true;
+        using (XmlWriter xw = XmlWriter.Create(savePath + "/" + fileName, _xwSettings))
+        {
+            NeatGenomeXmlIO.WriteComplete(xw, genome, true);
+        }
     }
 }
