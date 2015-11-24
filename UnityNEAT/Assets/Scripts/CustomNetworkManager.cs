@@ -6,5 +6,5 @@ using UnityEngine.Networking.Types;
 
 public class CustomNetworkManager : NetworkManager
 {
-
+    public string PlayerName;
 }

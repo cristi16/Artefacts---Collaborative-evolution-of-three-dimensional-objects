@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class NetworkInitializer : MonoBehaviour
 {
+    public Text welcomeBackText;
     public InputField nameField;
     public Button connectButton;
     [SerializeField] private bool autoConnect = true;
@@ -21,7 +22,16 @@ public class NetworkInitializer : MonoBehaviour
     void Start ()
 	{
 	    networkManager = FindObjectOfType<CustomNetworkManager>();
+        // This allows us to send as much data as possible. However this means that connection to server will be slow if the servers keeps track of a lot of objects
         networkManager.connectionConfig.MaxSentMessageQueueSize = UInt16.MaxValue;
+
+        // Set name field if name has been previously saved
+        if (PlayerPrefs.HasKey("PlayerName"))
+        {
+            nameField.gameObject.SetActive(false);
+            welcomeBackText.gameObject.SetActive(true);
+            welcomeBackText.text += PlayerPrefs.GetString("PlayerName");
+        }
 
         // Use the matchmaker
         if (useMatchmaking)
@@ -56,7 +66,7 @@ public class NetworkInitializer : MonoBehaviour
 
     void Update()
     {
-        //connectButton.isActiveAndEnabled = false;
+        connectButton.interactable = nameField.text != string.Empty;
     }
 
     void OnMatchList(ListMatchResponse matchList)
@@ -73,7 +83,8 @@ public class NetworkInitializer : MonoBehaviour
 
     public void ConnectToServer()
     {
-        PlayerPrefs.SetString("PlayerName" ,nameField.text);
+        PlayerPrefs.SetString("PlayerName" , nameField.text);
+        networkManager.PlayerName = nameField.text;
         networkManager.StartClient();
     }
 }
