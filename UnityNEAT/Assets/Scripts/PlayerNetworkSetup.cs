@@ -7,17 +7,19 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 public class PlayerNetworkSetup : NetworkBehaviour
 {
+    public List<Color> selectionColors;
+    public GameObject seedSelectionGfx;
+
     private Ray ray;
     private RaycastHit hitInfo;
     private const float rayDistance = 3f;
 
     private ArtefactEvolver evolver;
-
     private ScrollViewLayout scrollView;
-
     private List<ArtefactSeed> collectedSeeds;
-
     private string PlayerName;
+
+    private List<SeedSelection> seedSelections = new List<SeedSelection>(); 
 
     public override void OnStartServer()
     {
@@ -70,8 +72,24 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
                 }
             }
-            
-            if (Input.GetMouseButtonDown(1) && scrollView.transform.childCount > 0)
+
+            if (scrollView.transform.childCount == 0) return;
+
+            var currentlySelectedSeed = collectedSeeds[scrollView.selectedIndex];
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                if (HasSelectedSeed(currentlySelectedSeed))
+                {
+                    DeselectSeed(currentlySelectedSeed);
+                }
+                else if (seedSelections.Count < 3)
+                {
+                    SelectSeed(currentlySelectedSeed);
+                }
+            }
+
+            if (Input.GetMouseButtonDown(1))
             {
                 CmdSpawnSeed(collectedSeeds[scrollView.selectedIndex].ID, transform.position + transform.forward * 5f + transform.up * 5f);
                 if (evolver.destroySeedsOnPlacement)
@@ -104,5 +122,39 @@ public class PlayerNetworkSetup : NetworkBehaviour
     {
         var seedObject = NetworkServer.FindLocalObject(netID);
         NetworkServer.Destroy(seedObject);
+    }
+
+    private bool HasSelectedSeed(ArtefactSeed seed)
+    {
+        foreach (var seedSelection in seedSelections)
+        {
+            if (seedSelection.seed == seed) return true;
+        }
+        return false;
+    }
+
+    public void SelectSeed(ArtefactSeed seed)
+    {
+        var selectionGfx = Instantiate(seedSelectionGfx);
+        selectionGfx.transform.parent = seed.transform;
+        selectionGfx.transform.localPosition = seedSelectionGfx.transform.position;
+        selectionGfx.transform.localScale = seedSelectionGfx.transform.localScale;
+        selectionGfx.GetComponent<SpriteRenderer>().color = selectionColors[seedSelections.Count];
+
+        seedSelections.Add(new SeedSelection(seed, selectionGfx));
+    }
+
+    private void DeselectSeed(ArtefactSeed seed)
+    {
+        var index = -1;
+        for(int i = 0; i < seedSelections.Count; i++)
+        {
+            if (seedSelections[i].seed == seed)
+            {
+                Destroy(seedSelections[i].selectionGfx);
+                index = i;
+            }
+        }
+        seedSelections.RemoveAt(index);
     }
 }
