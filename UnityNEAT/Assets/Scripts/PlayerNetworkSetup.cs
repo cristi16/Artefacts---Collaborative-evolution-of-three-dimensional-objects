@@ -32,7 +32,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
             GetComponent<FirstPersonController>().enabled = false;
             GetComponentInChildren<Camera>().enabled = false;
             GetComponentInChildren<AudioListener>().enabled = false;
-
         }
         else
         {
@@ -72,9 +71,17 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 }
             }
             
-            if (Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButtonDown(1) && scrollView.transform.childCount > 0)
             {
                 CmdSpawnSeed(collectedSeeds[scrollView.selectedIndex].ID, transform.position + transform.forward * 5f + transform.up * 5f);
+                if (evolver.destroySeedsOnPlacement)
+                {
+                    CmdDestroySeed(collectedSeeds[scrollView.selectedIndex].ID);
+                    CmdDestroySeedObject(collectedSeeds[scrollView.selectedIndex].netId);
+                    collectedSeeds.RemoveAt(scrollView.selectedIndex);
+                    if (scrollView.selectedIndex > 0)
+                        scrollView.selectedIndex--;
+                }
             }
         }
     }
@@ -89,5 +96,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
     void CmdDestroySeed(uint seedID)
     {
         //evolver
+        evolver.DeleteSeed(seedID);
+    }
+
+    [Command]
+    void CmdDestroySeedObject(NetworkInstanceId netID)
+    {
+        var seedObject = NetworkServer.FindLocalObject(netID);
+        NetworkServer.Destroy(seedObject);
     }
 }

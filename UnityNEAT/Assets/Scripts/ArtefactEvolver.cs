@@ -11,6 +11,7 @@ public class ArtefactEvolver : NetworkBehaviour
 {
     public GameObject artefactPrefab;
     public GameObject seedPrefab;
+    public bool destroySeedsOnPlacement = true;
 
     private EvolutionHelper evolutionHelper;
     // maps seed unique ID to seed genome
@@ -41,6 +42,11 @@ public class ArtefactEvolver : NetworkBehaviour
     {
         SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition);
         SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
+    }
+
+    public void DeleteSeed(uint seedID)
+    {
+        seedsDictionary.Remove(seedID);
     }
 
     private void SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition)
