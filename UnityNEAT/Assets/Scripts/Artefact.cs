@@ -18,7 +18,9 @@ public class Artefact : NetworkBehaviour
 
     public const float k_artefactScale = 0.1326183f;
     public const float k_seedScale = 0.05f;
-    public const float k_growthSpeed = 1f;
+    public const float k_growthMove = 4f;
+    public const float k_growthTime = 3f;
+
     private static ArtefactEvaluator.VoxelVolume m_voxelVolume = new ArtefactEvaluator.VoxelVolume() { width = 16, height = 16, length = 16 };
 
     public override void OnStartClient()
@@ -80,19 +82,17 @@ public class Artefact : NetworkBehaviour
     IEnumerator Grow()
     {
         var rb = GetComponent<Rigidbody>();
-        while (rb.IsSleeping() == false)
+
+        float timer = 0f;
+        var initialScale = transform.localScale;
+        while (timer < k_growthTime)
         {
+            transform.localScale = Vector3.Lerp(initialScale, Vector3.one*k_artefactScale, timer / k_growthTime);
+            rb.MovePosition(transform.position + Vector3.up * Time.deltaTime * k_growthMove);
+            timer += Time.deltaTime;
             yield return null;
         }
-        while (transform.localScale.x < k_artefactScale * 0.99f)
-        {
-            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one*k_artefactScale, Time.deltaTime * k_growthSpeed);
-            rb.MovePosition(transform.position + Vector3.up * Time.deltaTime * (k_growthSpeed * 4f));
-            yield return null;
-        }
-        rb.MovePosition(transform.position + Vector3.up * Time.deltaTime * (k_growthSpeed * 4f));
+        rb.MovePosition(transform.position + Vector3.up * Time.deltaTime * k_growthMove);
         transform.localScale = Vector3.one * k_artefactScale;
-
-
     }
 }

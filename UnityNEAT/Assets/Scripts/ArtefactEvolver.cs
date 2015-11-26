@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -35,12 +36,12 @@ public class ArtefactEvolver : NetworkBehaviour
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
 
-        SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5f, Vector3.zero);
+        StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 0.5f, Vector3.zero));
     }
 
     public void SpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
     {
-        SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition, eulerAngles);
+        StartCoroutine(SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition, eulerAngles));
         SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
     }
 
@@ -48,7 +49,7 @@ public class ArtefactEvolver : NetworkBehaviour
     {
         var genome = NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(serializedGenome)), true);
         genome.GenomeFactory = evolutionHelper.GenomeFactory;
-        SpawnArtefactWithSeeds(genome, spawnPosition, eulerAngles);
+        StartCoroutine(SpawnArtefactWithSeeds(genome, spawnPosition, eulerAngles));
     }
 
     public void DeleteSeed(uint seedID)
@@ -56,19 +57,23 @@ public class ArtefactEvolver : NetworkBehaviour
         seedsDictionary.Remove(seedID);
     }
 
-    private void SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition, Vector3 eulerAngles)
+    IEnumerator SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition, Vector3 eulerAngles)
     {
         // Spawn Parent
         var artefactInstance = CreateArtefactInstance<Artefact>(genome, artefactPrefab, spawnPosition, eulerAngles);
         NetworkServer.Spawn(artefactInstance.gameObject);
+
+        yield return new WaitForSeconds(Artefact.k_growthTime);
+
         // Spawn Seeds
         for(int i = 0; i < k_numberOfSeeds; i++)
         {
             var seedGenome = evolutionHelper.MutateGenome(genome);
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
-            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, spawnPosition + direction * 5f, eulerAngles);
+            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, artefactInstance.transform.position + direction * 2f, Quaternion.LookRotation(direction).eulerAngles);
             seedInstance.ID = GenerateSeedID();
+            seedInstance.facingDirection = direction;
 
             NetworkServer.Spawn(seedInstance.gameObject);
 
