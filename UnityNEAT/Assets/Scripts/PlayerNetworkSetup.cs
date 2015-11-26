@@ -14,6 +14,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public List<Color> selectionColors;
     public GameObject seedSelectionGfx;
     public GameObject artefactGhost;
+    public float selectedSeedRotationSpeed = 6f;
 
     private Ray ray;
     private RaycastHit hitInfo;
@@ -73,6 +74,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
+                    hitInfo.collider.transform.rotation = Quaternion.identity;
                     hitInfo.collider.transform.parent = scrollView.transform;
                     hitInfo.collider.gameObject.layer = LayerMask.NameToLayer("UI");
                     scrollView.Reset();
@@ -85,6 +87,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (scrollView.transform.childCount == 0) return;
 
         var currentlySelectedSeed = collectedSeeds[scrollView.selectedIndex];
+        currentlySelectedSeed.transform.RotateAround(currentlySelectedSeed.transform.position, Vector3.up + Vector3.forward, Time.deltaTime * selectedSeedRotationSpeed);
 
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -185,8 +188,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     private void SelectSeed(ArtefactSeed seed)
     {
-        seed.transform.rotation = Quaternion.identity;
-
         var selectionGfx = Instantiate(seedSelectionGfx);
         selectionGfx.transform.parent = seed.transform;
         selectionGfx.transform.localPosition = seedSelectionGfx.transform.position;
