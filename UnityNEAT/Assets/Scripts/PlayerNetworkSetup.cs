@@ -15,6 +15,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public GameObject seedSelectionGfx;
     public GameObject artefactGhost;
     public float selectedSeedRotationSpeed = 6f;
+    public bool destroySeedsOnPlacement = true;
 
     private Ray ray;
     private RaycastHit hitInfo;
@@ -110,7 +111,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             else
                 CmdSpawnFromCrossoverResult(placeholderArtefact.SerializedGenome, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);    
 
-            if (evolver.destroySeedsOnPlacement)
+            if (destroySeedsOnPlacement)
             {
                 foreach (var seedSelection in seedSelections)
                 {

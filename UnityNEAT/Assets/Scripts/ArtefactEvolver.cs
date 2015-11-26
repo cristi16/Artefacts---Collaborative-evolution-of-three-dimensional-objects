@@ -12,7 +12,6 @@ public class ArtefactEvolver : NetworkBehaviour
 {
     public GameObject artefactPrefab;
     public GameObject seedPrefab;
-    public bool destroySeedsOnPlacement = true;
 
     private EvolutionHelper evolutionHelper;
     // maps seed unique ID to seed genome
