@@ -46,12 +46,13 @@ public class ScrollViewLayout : MonoBehaviour
 
     public void Reset()
     {
-        verticalPosition = 1;
         selectedIndex = transform.childCount - 1;
+        verticalPosition = 1;
     }
 
-    public void CenterOnItem(Transform target)
+    public void MoveToIndex(int index)
     {
-        
+        selectedIndex = index;
+        verticalPosition = Mathf.InverseLerp(0, transform.childCount - 1, index);
     }
 }

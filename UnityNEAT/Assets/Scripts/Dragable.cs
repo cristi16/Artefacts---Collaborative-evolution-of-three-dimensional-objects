@@ -14,7 +14,7 @@ public class Dragable : MonoBehaviour
     const float k_Distance = 0.2f;
     const bool k_AttachToCenterOfMass = false;
 
-    private SpringJoint m_SpringJoint;
+     SpringJoint m_SpringJoint;
 
 
     public void StopDragging()
@@ -22,14 +22,18 @@ public class Dragable : MonoBehaviour
         IsDragging = false;
     }
 
-    public void StartDragging()
+    public SpringJoint StartDragging(SpringJoint joint)
     {
-        if (!m_SpringJoint)
+        if (!joint)
         {
             var go = new GameObject("Rigidbody dragger");
             Rigidbody body = go.AddComponent<Rigidbody>();
             m_SpringJoint = go.AddComponent<SpringJoint>();
             body.isKinematic = true;
+        }
+        else
+        {
+            m_SpringJoint = joint;
         }
 
         m_SpringJoint.transform.position = transform.position;
@@ -42,6 +46,8 @@ public class Dragable : MonoBehaviour
 
         IsDragging = true;
         StartCoroutine(DragObject(k_DragDistance));
+
+        return m_SpringJoint;
     }
 
     private IEnumerator DragObject(float distance)
@@ -54,7 +60,10 @@ public class Dragable : MonoBehaviour
         while (IsDragging)
         {
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-            m_SpringJoint.transform.position = ray.GetPoint(distance);
+            var desiredPosition = ray.GetPoint(distance);
+            if(desiredPosition.y < 0f)
+                desiredPosition = new Vector3(desiredPosition.x, 0f, desiredPosition.z);
+            m_SpringJoint.transform.position = desiredPosition;
             yield return null;
         }
         if (m_SpringJoint.connectedBody)

@@ -35,13 +35,20 @@ public class ArtefactEvolver : NetworkBehaviour
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
 
-        SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5f);
+        SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5f, Vector3.zero);
     }
 
-    public void SpawnSeed(uint seedID, Vector3 spawnPosition)
+    public void SpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
     {
-        SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition);
+        SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition, eulerAngles);
         SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
+    }
+
+    public void SpawnCrossoverResult(string serializedGenome, Vector3 spawnPosition, Vector3 eulerAngles)
+    {
+        var genome = NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(serializedGenome)), true);
+        genome.GenomeFactory = evolutionHelper.GenomeFactory;
+        SpawnArtefactWithSeeds(genome, spawnPosition, eulerAngles);
     }
 
     public void DeleteSeed(uint seedID)
@@ -49,10 +56,10 @@ public class ArtefactEvolver : NetworkBehaviour
         seedsDictionary.Remove(seedID);
     }
 
-    private void SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition)
+    private void SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition, Vector3 eulerAngles)
     {
         // Spawn Parent
-        var artefactInstance = CreateArtefactInstance<Artefact>(genome, artefactPrefab, spawnPosition);
+        var artefactInstance = CreateArtefactInstance<Artefact>(genome, artefactPrefab, spawnPosition, eulerAngles);
         NetworkServer.Spawn(artefactInstance.gameObject);
         // Spawn Seeds
         for(int i = 0; i < k_numberOfSeeds; i++)
@@ -60,7 +67,7 @@ public class ArtefactEvolver : NetworkBehaviour
             var seedGenome = evolutionHelper.MutateGenome(genome);
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
-            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, spawnPosition + direction * 5f);
+            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, spawnPosition + direction * 5f, eulerAngles);
             seedInstance.ID = GenerateSeedID();
 
             NetworkServer.Spawn(seedInstance.gameObject);
@@ -69,7 +76,7 @@ public class ArtefactEvolver : NetworkBehaviour
         }
     }
 
-    private T CreateArtefactInstance<T>(NeatGenome genome, GameObject prefab ,Vector3 initialPosition) where T: Artefact
+    private T CreateArtefactInstance<T>(NeatGenome genome, GameObject prefab ,Vector3 initialPosition, Vector3 initialRotation) where T: Artefact
     {
         var artefactInstance = Instantiate(prefab);
 
@@ -80,6 +87,7 @@ public class ArtefactEvolver : NetworkBehaviour
         var artefact = artefactInstance.GetComponent<T>();
         artefact.SerializedGenome = serializedGenome;
         artefact.transform.position = initialPosition;
+        artefact.transform.eulerAngles = initialRotation;
         return artefact;
     }
 

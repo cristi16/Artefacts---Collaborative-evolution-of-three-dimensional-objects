@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Xml;
 using HighlightingSystem;
 using SharpNeat.Genomes.Neat;
@@ -11,6 +13,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 {
     public List<Color> selectionColors;
     public GameObject seedSelectionGfx;
+    public GameObject artefactGhost;
 
     private Ray ray;
     private RaycastHit hitInfo;
@@ -20,11 +23,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private ScrollViewLayout scrollView;
     private List<ArtefactSeed> collectedSeeds;
     private string PlayerName;
-    private bool isPlacingSeeds;
 
     private List<SeedSelection> seedSelections = new List<SeedSelection>();
-    private ArtefactSeed placeholderArtefact;
-    private float artefactScale = 0.1326183f;
+    private ArtefactGhost placeholderArtefact;
+    private SpringJoint placeholderSpringJoint;
 
     public override void OnStartServer()
     {
@@ -60,7 +62,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F))
             GetComponent<FirstPersonController>().IsFrozen = !GetComponent<FirstPersonController>().IsFrozen;
 
-        if (isPlacingSeeds == false)
+        if (seedSelections.Count == 0)
         {
             ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
             //Debug.DrawLine(ray.origin, ray.origin + ray.direction * rayDistance);
@@ -89,51 +91,65 @@ public class PlayerNetworkSetup : NetworkBehaviour
             if (HasSelectedSeed(currentlySelectedSeed))
             {
                 DeselectSeed(currentlySelectedSeed);
-                if (seedSelections.Count == 0)
-                {
-                    isPlacingSeeds = false;
-                }
+                UpdatePlaceholder();
             }
-            else if (seedSelections.Count < 3)
+            else if (seedSelections.Count < 2)
             {
-                if (seedSelections.Count == 0)
-                {
-                    isPlacingSeeds = true;
-                    placeholderArtefact = Instantiate(currentlySelectedSeed);
-                    placeholderArtefact.transform.position = Camera.main.transform.position +
-                                                             Camera.main.transform.forward * Dragable.k_DragDistance;
-                    placeholderArtefact.transform.localScale = Vector3.one * artefactScale;
-                    placeholderArtefact.GetComponent<Rigidbody>().mass = 0.01f;
-                    placeholderArtefact.gameObject.AddComponent<Dragable>().StartDragging();
-                }
                 SelectSeed(currentlySelectedSeed);
+                UpdatePlaceholder();
             }
         }
 
-        if (Input.GetMouseButtonDown(1) && isPlacingSeeds)
+        if (Input.GetMouseButtonDown(0) && seedSelections.Count > 0)
         {
-            CmdSpawnSeed(currentlySelectedSeed.ID, transform.position + transform.forward * 5f + transform.up * 5f);
+            if(seedSelections.Count == 1)
+                CmdSpawnSeed(currentlySelectedSeed.ID, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);
+            else
+                CmdSpawnFromCrossoverResult(placeholderArtefact.SerializedGenome, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);    
+
             if (evolver.destroySeedsOnPlacement)
             {
-                CmdDestroySeed(currentlySelectedSeed.ID);
-                CmdDestroySeedObject(currentlySelectedSeed.netId);
-                collectedSeeds.RemoveAt(scrollView.selectedIndex);
-                if (scrollView.selectedIndex > 0)
-                    scrollView.selectedIndex--;
+                foreach (var seedSelection in seedSelections)
+                {
+                    CmdDestroySeed(seedSelection.seed.ID);
+                    CmdDestroySeedObject(seedSelection.seed.netId);
+                    collectedSeeds.Remove(seedSelection.seed);
+                    seedSelection.seed.transform.parent = null;
+                }
+
+                if (seedSelections.Count == 1)
+                {
+                    if (seedSelections[0].indexInInventory > 0)
+                        scrollView.MoveToIndex(seedSelections[0].indexInInventory - 1);
+                }
+                else
+                {
+                    var minIndex = int.MaxValue;
+                    foreach (var seedSelection in seedSelections)
+                    {
+                        if (seedSelection.indexInInventory < minIndex)
+                            minIndex = seedSelection.indexInInventory;
+                    }
+
+                    if(minIndex > 0)
+                        scrollView.MoveToIndex(minIndex - 1);
+                }
             }
+
+            Destroy(placeholderArtefact.gameObject);
+            seedSelections.Clear();
         }
     }
 
     [Command]
-    void CmdSpawnSeed(uint seedID, Vector3 spawnPosition)
+    void CmdSpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
     {
-        evolver.SpawnSeed(seedID, spawnPosition);
+        evolver.SpawnSeed(seedID, spawnPosition, eulerAngles);
     }
 
     [Command]
     void CmdDestroySeed(uint seedID)
     {
-        //evolver
         evolver.DeleteSeed(seedID);
     }
 
@@ -145,32 +161,32 @@ public class PlayerNetworkSetup : NetworkBehaviour
     }
 
     [Command]
-    void CmdSpawnFromCrossoverResult(string serializedCrossoverResult)
+    void CmdSpawnFromCrossoverResult(string serializedCrossoverResult, Vector3 spawnPosition, Vector3 eulerAngles)
     {
-        
+        evolver.SpawnCrossoverResult(serializedCrossoverResult, spawnPosition, eulerAngles);
     }
 
-    public void CombineSeeds(ArtefactSeed seed1, ArtefactSeed seed2)
+    private string CombineSeeds(ArtefactSeed seed1, ArtefactSeed seed2)
     {
         var genome1 =  NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(seed1.SerializedGenome)), true);
+        genome1.GenomeFactory = EvolutionHelper.Instance.GenomeFactory;
         var genome2 =  NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(seed2.SerializedGenome)), true);
+        genome2.GenomeFactory = EvolutionHelper.Instance.GenomeFactory;
 
         var result = genome1.CreateOffspring(genome2, (uint)Mathf.Max(genome1.BirthGeneration, genome2.BirthGeneration) + 1);
 
-        var serializedGenome = NeatGenomeXmlIO.Save(result, true).OuterXml;
+        return NeatGenomeXmlIO.Save(result, true).OuterXml;
     }
 
     private bool HasSelectedSeed(ArtefactSeed seed)
     {
-        foreach (var seedSelection in seedSelections)
-        {
-            if (seedSelection.seed == seed) return true;
-        }
-        return false;
+        return seedSelections.Any(seedSelection => seedSelection.seed == seed);
     }
 
-    public void SelectSeed(ArtefactSeed seed)
+    private void SelectSeed(ArtefactSeed seed)
     {
+        seed.transform.rotation = Quaternion.identity;
+
         var selectionGfx = Instantiate(seedSelectionGfx);
         selectionGfx.transform.parent = seed.transform;
         selectionGfx.transform.localPosition = seedSelectionGfx.transform.position;
@@ -180,7 +196,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         selectionGfx.transform.localScale = gfxScale;
         selectionGfx.GetComponent<SpriteRenderer>().color = selectionColors[seedSelections.Count];
 
-        seedSelections.Add(new SeedSelection(seed, selectionGfx));
+        seedSelections.Add(new SeedSelection(seed, selectionGfx, scrollView.selectedIndex));
     }
 
     private void DeselectSeed(ArtefactSeed seed)
@@ -195,5 +211,50 @@ public class PlayerNetworkSetup : NetworkBehaviour
             }
         }
         seedSelections.RemoveAt(index);
+    }
+
+    private void UpdatePlaceholder()
+    {
+        switch (seedSelections.Count)
+        {
+            case 0:
+                Destroy(placeholderArtefact.gameObject);
+                break;
+            case 1:
+                InstantiatePlaceholder(seedSelections[0].seed.SerializedGenome);
+                break;
+            case 2:
+                // combine 2 seeds and show the output
+                var combinedGenome = CombineSeeds(seedSelections[0].seed, seedSelections[1].seed);
+                InstantiatePlaceholder(combinedGenome);
+                break;
+            default:
+                Debug.Log("Selected too many seeds!");
+                return;
+        }
+
+        
+    }
+
+    private void InstantiatePlaceholder(string serializedGenome)
+    {
+        if(placeholderArtefact != null)
+            Destroy(placeholderArtefact.gameObject);
+
+        placeholderArtefact = Instantiate(artefactGhost).GetComponent<ArtefactGhost>();
+        placeholderArtefact.SerializedGenome = serializedGenome;
+
+        var desiredPosition = Camera.main.transform.position + Camera.main.transform.forward * Dragable.k_DragDistance;
+        if (desiredPosition.y < 0f)
+            desiredPosition = new Vector3(desiredPosition.x, 0f, desiredPosition.z);
+        placeholderArtefact.transform.position = desiredPosition;
+
+        placeholderArtefact.transform.localScale = Vector3.one * Artefact.k_seedScale;
+        placeholderArtefact.GetComponent<Rigidbody>().mass = 0.01f;
+
+        placeholderArtefact.GetComponent<Highlighter>().ConstantOn(Color.white);
+
+        var draggable = placeholderArtefact.gameObject.AddComponent<Dragable>();
+        placeholderSpringJoint = draggable.StartDragging(placeholderSpringJoint);
     }
 }

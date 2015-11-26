@@ -1,30 +1,24 @@
-using System;
 using UnityEngine;
 using System.Collections;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Xml;
-using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Genomes.Neat;
-using UnityEngine.Networking;
 
-public class Artefact : NetworkBehaviour
+public class ArtefactGhost : MonoBehaviour
 {
     public Material artefactMaterial;
 
-    [HideInInspector, SyncVar] public string SerializedGenome;
+    [HideInInspector]
+    public string SerializedGenome;
 
     public const float k_artefactScale = 0.1326183f;
     public const float k_seedScale = 0.05f;
-    public const float k_growthSpeed = 1f;
     private static ArtefactEvaluator.VoxelVolume m_voxelVolume = new ArtefactEvaluator.VoxelVolume() { width = 16, height = 16, length = 16 };
 
-    public override void OnStartClient()
+    void Start()
     {
-        base.OnStartClient();
-
         if (SerializedGenome == string.Empty)
         {
             Debug.LogError("Spawned artefact without genome!");
@@ -56,9 +50,6 @@ public class Artefact : NetworkBehaviour
         Profiler.BeginSample("Display");
         DisplayMesh(mesh);
         Profiler.EndSample();
-
-        if(this.GetType() == typeof(Artefact))
-            StartCoroutine(Grow());
     }
 
     void DisplayMesh(Mesh mesh)
@@ -69,30 +60,6 @@ public class Artefact : NetworkBehaviour
         gameObject.GetComponent<MeshFilter>().mesh = mesh;
         gameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
 
-        // Concave collider generation is cool but it is incredibly slow at runtime, especially when generating them for multiple meshes at the same time. 
-        // This is also probably slow because our meshes have lots of vertices
-        //var concaveCollider = gameObject.AddComponent<ConcaveCollider>();
-        //concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
-        //concaveCollider.ComputeHulls(null, null);
         gameObject.AddComponent<MeshCollider>().convex = true;
-    }
-
-    IEnumerator Grow()
-    {
-        var rb = GetComponent<Rigidbody>();
-        while (rb.IsSleeping() == false)
-        {
-            yield return null;
-        }
-        while (transform.localScale.x < k_artefactScale * 0.99f)
-        {
-            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one*k_artefactScale, Time.deltaTime * k_growthSpeed);
-            rb.MovePosition(transform.position + Vector3.up * Time.deltaTime * (k_growthSpeed * 4f));
-            yield return null;
-        }
-        rb.MovePosition(transform.position + Vector3.up * Time.deltaTime * (k_growthSpeed * 4f));
-        transform.localScale = Vector3.one * k_artefactScale;
-
-
     }
 }
