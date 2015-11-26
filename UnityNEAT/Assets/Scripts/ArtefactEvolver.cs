@@ -65,7 +65,7 @@ public class ArtefactEvolver : NetworkBehaviour
 
             NetworkServer.Spawn(seedInstance.gameObject);
 
-            seedsDictionary.Add(seedInstance.ID, seedGenome);       
+            seedsDictionary.Add(seedInstance.ID, seedGenome);      
         }
     }
 
