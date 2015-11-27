@@ -15,6 +15,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public GameObject artefactGhost;
     public float selectedSeedRotationSpeed = 6f;
     public bool destroySeedsOnPlacement = true;
+    [Tooltip("How many times do we show the pick seed helper icon")]
+    public int pickupIconMax = 1000;
+    [Tooltip("How many times do we show the plant seed helper icon")]
+    public int plantIconMax = 1000;
 
     private Ray ray;
     private RaycastHit hitInfo;
@@ -24,11 +28,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private ScrollViewLayout scrollView;
     private PopupUIElement seedAnimation;
     private PopupUIElement pickUpIcon;
+    private PopupUIElement plantIcon;
     private GameObject selectSeedKey;
     private ShowSideUI sideUI;
     private int pickupIconCount = 0;
-    private int pickupIconMax = 1000;
+    private int plantIconCount = 0;
     private bool hoveringOverSeed = false;
+    private bool showingPlantIcon = false;
     private List<ArtefactSeed> collectedSeeds;
     private string PlayerName;
 
@@ -62,6 +68,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             gameObject.name = PlayerName;
 
             pickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
+            plantIcon = GameObject.FindGameObjectWithTag("PlantIcon").GetComponent<PopupUIElement>();
             seedAnimation = GameObject.FindGameObjectWithTag("SeedAnimation").GetComponent<PopupUIElement>();
             selectSeedKey = GameObject.FindGameObjectWithTag("SelectSeedKey");
             sideUI = GameObject.FindGameObjectWithTag("SideUI").GetComponent<ShowSideUI>();
@@ -236,6 +243,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
         selectionGfx.transform.localScale = new Vector3(13.6f, 7.8f, 1f);
 
         seedSelections.Add(new SeedSelection(seed, selectionGfx, scrollView.selectedIndex));
+
+        plantIconCount++;
+        if (!showingPlantIcon && plantIconCount < plantIconMax)
+        {
+            showingPlantIcon = true;
+            plantIcon.PopUp();
+        }
     }
 
     private void DeselectSeed(ArtefactSeed seed)
@@ -250,6 +264,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
             }
         }
         seedSelections.RemoveAt(index);
+
+        if (showingPlantIcon && seedSelections.Count == 0)
+        {
+            showingPlantIcon = false;
+            plantIcon.PopDown();
+        }
     }
 
     private void UpdatePlaceholder()
