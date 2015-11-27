@@ -23,7 +23,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     private ArtefactEvolver evolver;
     private ScrollViewLayout scrollView;
-    private PopupUIElement PickUpIcon;
+    private PopupUIElement pickUpIcon;
+    private GameObject selectSeedKey;
     private int pickupIconCount = 0;
     private int pickupIconMax = 1000;
     private bool hoveringOverSeed = false;
@@ -59,7 +60,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
             PlayerName = PlayerPrefs.GetString("PlayerName");
             gameObject.name = PlayerName;
 
-            PickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
+            pickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
+            selectSeedKey = GameObject.FindGameObjectWithTag("SelectSeedKey");
         }
     }
 
@@ -80,7 +82,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
                 if (!hoveringOverSeed && pickupIconCount < pickupIconMax)
                 {
-                    PickUpIcon.PopUp();
+                    pickUpIcon.PopUp();
                     hoveringOverSeed = true;
                     pickupIconCount++;
                 }
@@ -88,8 +90,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 if (Input.GetMouseButtonDown(0))
                 {
                     hitInfo.collider.transform.rotation = Quaternion.identity;
+                    hitInfo.collider.GetComponent<Rigidbody>().isKinematic = true;
                     hitInfo.collider.transform.parent = scrollView.transform;
                     hitInfo.collider.gameObject.layer = LayerMask.NameToLayer("UI");
+
+                    hitInfo.collider.transform.localScale = Vector3.one * 4f;
+
                     scrollView.Reset();
 
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
@@ -99,7 +105,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             {
                 if (hoveringOverSeed)
                 {
-                    PickUpIcon.PopDown();
+                    pickUpIcon.PopDown();
                     hoveringOverSeed = false;
                 }
             }
@@ -112,6 +118,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
+            selectSeedKey.GetComponent<Animation>().Play();
+
             if (HasSelectedSeed(currentlySelectedSeed))
             {
                 DeselectSeed(currentlySelectedSeed);
@@ -207,10 +215,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         var selectionGfx = Instantiate(seedSelectionGfx);
         selectionGfx.transform.parent = seed.transform;
         selectionGfx.transform.localPosition = seedSelectionGfx.transform.position;
-        var canvasScale = seed.transform.root.GetComponent<RectTransform>().localScale;
-        var gfxScale = seedSelectionGfx.transform.localScale;
-        gfxScale.Scale(canvasScale);
-        selectionGfx.transform.localScale = gfxScale;
+        selectionGfx.transform.localScale = new Vector3(13.6f, 7.8f, 1f);
         selectionGfx.GetComponent<SpriteRenderer>().color = selectionColors[seedSelections.Count];
 
         seedSelections.Add(new SeedSelection(seed, selectionGfx, scrollView.selectedIndex));
