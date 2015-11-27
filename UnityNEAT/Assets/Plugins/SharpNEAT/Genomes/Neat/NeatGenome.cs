@@ -497,9 +497,10 @@ namespace SharpNeat.Genomes.Neat
             for(;;)
             {
                 int outcome = RouletteWheel.SingleThrow(rwlCurrent, _genomeFactory.Rng);
-                // if we mutate for the first time we want to add a connection to avoid boring shapes
-                if (BirthGeneration <= 1)
-                    outcome = 2;
+
+                // In order to avoid boring looking shaped, first X generation we only add nodes/connections
+                if (BirthGeneration <= 5)
+                    outcome = BirthGeneration % 2 == 0 ? 2 : 1;
 
                 switch(outcome)
                 {

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Xml;
 using UnityEngine;
 using SharpNeat.Decoders;
@@ -37,7 +35,7 @@ public class MeshEvolver : MonoBehaviour
         genomeDecoder = new NeatGenomeDecoder(NetworkActivationScheme.CreateAcyclicScheme());
         ArtefactEvaluator.DefaultInputType = InputType;
 
-        //SaveGenome();
+        SaveGenome();
         Sine.__DefaultInstance.Curve = sineCurve;
 
         m_meshGameObject = new GameObject("Mesh");
@@ -53,7 +51,7 @@ public class MeshEvolver : MonoBehaviour
 	    if (Input.GetKey(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow))
 	    {
 	        currentGenome = evolutionHelper.MutateGenome(currentGenome);
-            Debug.Log("Current generation: " + currentGenome.BirthGeneration);
+            //Debug.Log("Current generation: " + currentGenome.BirthGeneration);
             //var byteCount = System.Text.ASCIIEncoding.ASCII.GetByteCount(NeatGenomeXmlIO.Save(currentGenome, true).OuterXml);
             //Debug.LogWarning("Byte count: " + byteCount);
 
@@ -70,7 +68,7 @@ public class MeshEvolver : MonoBehaviour
 	        m_meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
 	        //m_meshGameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
 
-            //SaveGenome();
+            SaveGenome();
 	    }
 	}
 
@@ -82,6 +80,15 @@ public class MeshEvolver : MonoBehaviour
         {
             NeatGenomeXmlIO.WriteComplete(xw, currentGenome, true);
         }
+    }
+
+    void OnGUI()
+    {
+        GUI.Label(GUILayoutUtility.GetRect(0, 200, 0, 20), "Generation: " + currentGenome.BirthGeneration);
+        GUI.Label(GUILayoutUtility.GetRect(0, 200, 0, 20), "Output range: [" + evaluationInfo.minOutputValue.ToString("0.00") 
+            + ", " + evaluationInfo.maxOutputValue.ToString("0.00") + "]");
+        GUI.Label(GUILayoutUtility.GetRect(0, 200, 0, 20), "Number or neurons: " + currentGenome.NeuronGeneList.Count);
+        GUI.Label(GUILayoutUtility.GetRect(0, 200, 0, 20), "Number or connections: " + currentGenome.ConnectionGeneList.Count);
     }
 
     private void OnDrawGizmos()
