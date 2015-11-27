@@ -33,6 +33,9 @@ public class NetworkInitializer : MonoBehaviour
             welcomeBackText.text += PlayerPrefs.GetString("PlayerName");
         }
 
+        nameField.Select();
+        nameField.ActivateInputField();
+
         // Use the matchmaker
         if (useMatchmaking)
         {

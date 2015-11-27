@@ -17,12 +17,14 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public bool destroySeedsOnPlacement = true;
     [Tooltip("How many times do we show the pick seed helper icon")]
     public int pickupIconMax = 1000;
+
     [Tooltip("How many times do we show the plant seed helper icon")]
     public int plantIconMax = 1000;
+    [Tooltip("The maximum distance at which we can pick up seeds from")]
+    public float pickUpDistance = 3f;
 
     private Ray ray;
     private RaycastHit hitInfo;
-    private const float rayDistance = 3f;
 
     private ArtefactEvolver evolver;
     private ScrollViewLayout scrollView;
@@ -86,7 +88,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         {
             ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
 
-            if (Physics.Raycast(ray, out hitInfo, rayDistance, LayerMask.GetMask("Seed")))
+            if (Physics.Raycast(ray, out hitInfo, pickUpDistance, LayerMask.GetMask("Seed")))
             {
                 hitInfo.collider.GetComponent<Highlighter>().On(Color.green);
 
@@ -111,6 +113,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
 
                     sideUI.ShowUI(collectedSeeds.Count);
+
+                    return;
                 }
             }
             else
@@ -190,6 +194,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
             Destroy(placeholderArtefact.gameObject);
             seedSelections.Clear();
+
+            if (showingPlantIcon)
+            {
+                showingPlantIcon = false;
+                plantIcon.PopDown();
+            }
         }
     }
 
