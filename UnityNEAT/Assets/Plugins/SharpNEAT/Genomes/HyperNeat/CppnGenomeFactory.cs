@@ -95,7 +95,6 @@ namespace SharpNeat.Genomes.HyperNeat
                 default:
                 {
                     activationFnId = _activationFnLibrary.GetRandomFunction(_rng).Id;
-                    UnityEngine.Debug.LogWarning("Created neuron with activation fn: " + activationFnId);
                     break;
                 }
             }

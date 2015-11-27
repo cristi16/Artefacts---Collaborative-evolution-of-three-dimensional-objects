@@ -725,14 +725,6 @@ namespace SharpNeat.Genomes.Neat
 
                     // Valid target nodes are all hidden and output nodes.
                     int tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount-1);
-
-                    //// don't connect bias to output directly
-                    //if(srcNeuronIdx == 0 && tgtNeuronIdx == _inputAndBiasNeuronCount + hiddenOutputNeuronCount - 1)
-                    //    continue;
-
-                    //// don't connect a hidden node to another hidden node
-                    //if(srcNeuronIdx > 4 && hiddenOutputNeuronCount > 1 && tgtNeuronIdx != _inputAndBiasNeuronCount + hiddenOutputNeuronCount - 1)
-                    //    continue;
                     
                     if(srcNeuronIdx == tgtNeuronIdx)  {
                         if(++tgtNeuronIdx == neuronCount) {
