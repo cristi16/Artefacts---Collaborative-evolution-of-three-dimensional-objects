@@ -111,6 +111,15 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 }
             }
         }
+        else
+        {
+            if (hoveringOverSeed)
+            {
+                pickUpIcon.PopDown();
+                hoveringOverSeed = false;
+            }
+        }
+
 
         if (scrollView.transform.childCount == 0) return;
 
