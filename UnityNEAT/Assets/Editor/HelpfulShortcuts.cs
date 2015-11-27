@@ -21,4 +21,9 @@ public class HelpfulShortcuts
         EditorApplication.SaveScene(EditorApplication.currentScene);
         EditorApplication.OpenScene(playgroundScene);
     }
+    [MenuItem("Custom tools/Delete PlayerPrefs %#x" )]
+    public static void DeleteAllPlayerPrefs()
+    {
+        PlayerPrefs.DeleteAll();
+    }
 }

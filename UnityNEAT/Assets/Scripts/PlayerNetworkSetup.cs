@@ -25,6 +25,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private PopupUIElement seedAnimation;
     private PopupUIElement pickUpIcon;
     private GameObject selectSeedKey;
+    private ShowSideUI sideUI;
     private int pickupIconCount = 0;
     private int pickupIconMax = 1000;
     private bool hoveringOverSeed = false;
@@ -63,6 +64,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             pickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
             seedAnimation = GameObject.FindGameObjectWithTag("SeedAnimation").GetComponent<PopupUIElement>();
             selectSeedKey = GameObject.FindGameObjectWithTag("SelectSeedKey");
+            sideUI = GameObject.FindGameObjectWithTag("SideUI").GetComponent<ShowSideUI>();
         }
     }
 
@@ -100,6 +102,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     scrollView.Reset();
 
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
+
+                    sideUI.ShowUI(collectedSeeds.Count);
                 }
             }
             else
