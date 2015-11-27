@@ -23,6 +23,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     private ArtefactEvolver evolver;
     private ScrollViewLayout scrollView;
+    private PopupUIElement PickUpIcon;
+    private int pickupIconCount = 0;
+    private int pickupIconMax = 1000;
+    private bool hoveringOverSeed = false;
     private List<ArtefactSeed> collectedSeeds;
     private string PlayerName;
 
@@ -54,6 +58,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
             PlayerName = PlayerPrefs.GetString("PlayerName");
             gameObject.name = PlayerName;
+
+            PickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
         }
     }
 
@@ -67,11 +73,17 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (seedSelections.Count == 0)
         {
             ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-            //Debug.DrawLine(ray.origin, ray.origin + ray.direction * rayDistance);
 
             if (Physics.Raycast(ray, out hitInfo, rayDistance, LayerMask.GetMask("Seed")))
             {
                 hitInfo.collider.GetComponent<Highlighter>().On(Color.green);
+
+                if (!hoveringOverSeed && pickupIconCount < pickupIconMax)
+                {
+                    PickUpIcon.PopUp();
+                    hoveringOverSeed = true;
+                    pickupIconCount++;
+                }
 
                 if (Input.GetMouseButtonDown(0))
                 {
@@ -81,6 +93,14 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     scrollView.Reset();
 
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
+                }
+            }
+            else
+            {
+                if (hoveringOverSeed)
+                {
+                    PickUpIcon.PopDown();
+                    hoveringOverSeed = false;
                 }
             }
         }
@@ -128,12 +148,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 }
                 else
                 {
-                    var minIndex = int.MaxValue;
-                    foreach (var seedSelection in seedSelections)
-                    {
-                        if (seedSelection.indexInInventory < minIndex)
-                            minIndex = seedSelection.indexInInventory;
-                    }
+                    var minIndex = seedSelections.Select(seedSelection => seedSelection.indexInInventory).Min();
 
                     if(minIndex > 0)
                         scrollView.MoveToIndex(minIndex - 1);
