@@ -11,7 +11,6 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 public class PlayerNetworkSetup : NetworkBehaviour
 {
-    public List<Color> selectionColors;
     public GameObject seedSelectionGfx;
     public GameObject artefactGhost;
     public float selectedSeedRotationSpeed = 6f;
@@ -23,6 +22,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     private ArtefactEvolver evolver;
     private ScrollViewLayout scrollView;
+    private PopupUIElement seedAnimation;
     private PopupUIElement pickUpIcon;
     private GameObject selectSeedKey;
     private int pickupIconCount = 0;
@@ -61,6 +61,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             gameObject.name = PlayerName;
 
             pickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
+            seedAnimation = GameObject.FindGameObjectWithTag("SeedAnimation").GetComponent<PopupUIElement>();
             selectSeedKey = GameObject.FindGameObjectWithTag("SelectSeedKey");
         }
     }
@@ -120,6 +121,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
         {
             selectSeedKey.GetComponent<Animation>().Play();
 
+            int previousNumberOrSelectedSeeds = seedSelections.Count;
+
             if (HasSelectedSeed(currentlySelectedSeed))
             {
                 DeselectSeed(currentlySelectedSeed);
@@ -130,6 +133,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 SelectSeed(currentlySelectedSeed);
                 UpdatePlaceholder();
             }
+
+            UpdateSeedAnimation(previousNumberOrSelectedSeeds);
         }
 
         if (Input.GetMouseButtonDown(0) && seedSelections.Count > 0)
@@ -216,7 +221,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
         selectionGfx.transform.parent = seed.transform;
         selectionGfx.transform.localPosition = seedSelectionGfx.transform.position;
         selectionGfx.transform.localScale = new Vector3(13.6f, 7.8f, 1f);
-        selectionGfx.GetComponent<SpriteRenderer>().color = selectionColors[seedSelections.Count];
 
         seedSelections.Add(new SeedSelection(seed, selectionGfx, scrollView.selectedIndex));
     }
@@ -279,4 +283,24 @@ public class PlayerNetworkSetup : NetworkBehaviour
         var draggable = placeholderArtefact.gameObject.AddComponent<Dragable>();
         placeholderSpringJoint = draggable.StartDragging(placeholderSpringJoint);
     }
+
+    void UpdateSeedAnimation(int previousCount)
+    {
+        switch (seedSelections.Count)
+        {
+            case 0:
+                seedAnimation.transform.GetChild(2).gameObject.SetActive(false);
+                break;
+            case 1:
+                if(previousCount == 2)
+                    seedAnimation.PopDown();
+                if(previousCount == 0)
+                    seedAnimation.transform.GetChild(2).gameObject.SetActive(true);
+                break;
+            case 2:
+                seedAnimation.PopUp();
+                break;
+        }
+    }
+
 }
