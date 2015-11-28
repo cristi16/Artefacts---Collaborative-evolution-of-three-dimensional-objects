@@ -19,6 +19,8 @@ public class NetworkInitializer : MonoBehaviour
 
     private CustomNetworkManager networkManager;
 
+    private enum ConnectionType { Client, Host, Server}
+
     void Start ()
 	{
 	    networkManager = FindObjectOfType<CustomNetworkManager>();
@@ -53,16 +55,16 @@ public class NetworkInitializer : MonoBehaviour
 	        if (serverInEditor)
 	        {
 	            if (Application.isEditor)
-	                networkManager.StartHost();
+	                ConnectAs(ConnectionType.Host);
 	            else
-	                networkManager.StartClient();
+	                ConnectAs(ConnectionType.Client);
 	        }
 	        else
 	        {
 	            if (Application.isEditor)
-	                networkManager.StartClient();
+	                ConnectAs(ConnectionType.Client);
 	            else
-	                networkManager.StartHost();
+	                ConnectAs(ConnectionType.Host);
 	        }
 	    }
 	}
@@ -87,10 +89,44 @@ public class NetworkInitializer : MonoBehaviour
 
     public void ConnectToServer()
     {
-        if (PlayerPrefs.HasKey("PlayerName") == false)
-        { 
-            PlayerPrefs.SetString("PlayerName" , nameField.text);
+        ConnectAs(ConnectionType.Client);   
+    }
+
+    private void ConnectAs(ConnectionType connectionType, MatchInfo matchInfo = null)
+    {
+        switch (connectionType)
+        {
+                case ConnectionType.Client:
+                    
+                    SavePlayerName();
+                    if (matchInfo != null)
+                        networkManager.StartClient(matchInfo);
+                    else
+                        networkManager.StartClient();
+                    break;
+
+                case ConnectionType.Host:
+                    
+                    SavePlayerName();
+                    if (matchInfo != null)
+                        networkManager.StartHost(matchInfo);
+                    else
+                        networkManager.StartHost();
+                    break;
+
+                case ConnectionType.Server:
+
+                    networkManager.StartServer();
+
+                break;
         }
-        networkManager.StartClient();
+    }
+
+    private void SavePlayerName()
+    {
+        if (PlayerPrefs.HasKey("PlayerName") == false)
+        {
+            PlayerPrefs.SetString("PlayerName", nameField.text);
+        }
     }
 }

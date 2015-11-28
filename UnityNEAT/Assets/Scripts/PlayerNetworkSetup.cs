@@ -7,6 +7,7 @@ using HighlightingSystem;
 using SharpNeat.Genomes.Neat;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 
 public class PlayerNetworkSetup : NetworkBehaviour
@@ -20,9 +21,11 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     [Tooltip("How many times do we show the plant seed helper icon")]
     public int plantIconMax = 1000;
+
     [Tooltip("The maximum distance at which we can pick up seeds from")]
     public float pickUpDistance = 3f;
-
+    [HideInInspector, SyncVar]
+    public string PlayerName;
     private Ray ray;
     private RaycastHit hitInfo;
 
@@ -38,7 +41,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private bool hoveringOverSeed = false;
     private bool showingPlantIcon = false;
     private List<ArtefactSeed> collectedSeeds;
-    private string PlayerName;
+    private GameObject worldCanvas;
 
     private List<SeedSelection> seedSelections = new List<SeedSelection>();
     private ArtefactGhost placeholderArtefact;
@@ -57,6 +60,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             GetComponent<FirstPersonController>().enabled = false;
             GetComponentInChildren<Camera>().enabled = false;
             GetComponentInChildren<AudioListener>().enabled = false;
+            worldCanvas = GetComponentInChildren<Canvas>().gameObject;
         }
         else
         {
@@ -66,8 +70,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
 
-            PlayerName = PlayerPrefs.GetString("PlayerName");
-            gameObject.name = PlayerName;
+            CmdSetPlayerName(PlayerPrefs.GetString("PlayerName"));
+            UpdateName();
 
             pickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
             plantIcon = GameObject.FindGameObjectWithTag("PlantIcon").GetComponent<PopupUIElement>();
@@ -79,7 +83,16 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!isLocalPlayer)
+        {
+            if(gameObject.name != PlayerName)
+                UpdateName();
+
+            var directionToPlayer = transform.position - ClientScene.localPlayers[0].gameObject.transform.position;
+            if(directionToPlayer != Vector3.zero)
+                worldCanvas.transform.rotation = Quaternion.LookRotation(directionToPlayer);
+            return;
+        }
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F))
             GetComponent<FirstPersonController>().IsFrozen = !GetComponent<FirstPersonController>().IsFrozen;
@@ -226,6 +239,18 @@ public class PlayerNetworkSetup : NetworkBehaviour
     void CmdSpawnFromCrossoverResult(string serializedCrossoverResult, Vector3 spawnPosition, Vector3 eulerAngles)
     {
         evolver.SpawnCrossoverResult(serializedCrossoverResult, spawnPosition, eulerAngles);
+    }
+
+    [Command]
+    void CmdSetPlayerName(string name)
+    {
+        PlayerName = name;
+    }
+
+    private void UpdateName()
+    {    
+        gameObject.name = PlayerName;
+        GetComponentInChildren<Text>().text = PlayerName;
     }
 
     private string CombineSeeds(ArtefactSeed seed1, ArtefactSeed seed2)
