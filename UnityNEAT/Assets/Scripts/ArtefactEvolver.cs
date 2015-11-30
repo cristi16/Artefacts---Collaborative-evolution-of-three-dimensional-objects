@@ -22,6 +22,8 @@ public class ArtefactEvolver : NetworkBehaviour
     private string serverStartTime;
     private string savePath;
 
+    private Statistics statistics = new Statistics();
+
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -34,21 +36,32 @@ public class ArtefactEvolver : NetworkBehaviour
 
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
+        //for (int i = 0; i < 10; i++)
+        //    initialGenome = evolutionHelper.MutateGenome(initialGenome);
 
         StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 0.5f, Vector3.zero));
     }
 
-    public void SpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
+    public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
     {
         StartCoroutine(SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition, eulerAngles));
-        SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
+
+        //SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
     }
 
     public void SpawnCrossoverResult(string serializedGenome, Vector3 spawnPosition, Vector3 eulerAngles)
     {
         var genome = NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(serializedGenome)), true);
         genome.GenomeFactory = evolutionHelper.GenomeFactory;
-        StartCoroutine(SpawnArtefactWithSeeds(genome, spawnPosition, eulerAngles));
+
+        //Genome ID is wrong because by doing the crossover on the client the genome factory is not the same as the one on the server
+        // Therefore, we create a copy and generate a valid ID. This way all spawned genomes have unique IDs
+        var validGenome = evolutionHelper.GenomeFactory.CreateGenomeCopy(genome,
+            evolutionHelper.GenomeFactory.NextGenomeId(), genome.BirthGeneration);
+
+        StartCoroutine(SpawnArtefactWithSeeds(validGenome, spawnPosition, eulerAngles));
+
+        //SaveGenome(validGenome, validGenome.Id + ".gnm.xml");
     }
 
     public void DeleteSeed(uint seedID)
@@ -71,7 +84,7 @@ public class ArtefactEvolver : NetworkBehaviour
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
             var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, artefactInstance.transform.position + direction * 2f, Quaternion.LookRotation(direction).eulerAngles);
-            seedInstance.ID = GenerateSeedID();
+            seedInstance.ID = seedGenome.Id;
             seedInstance.facingDirection = direction;
 
             NetworkServer.Spawn(seedInstance.gameObject);
@@ -93,11 +106,6 @@ public class ArtefactEvolver : NetworkBehaviour
         artefact.transform.position = initialPosition;
         artefact.transform.eulerAngles = initialRotation;
         return artefact;
-    }
-
-    private uint GenerateSeedID()
-    {
-        return ++idCount;
     }
 
     private void SaveGenome(NeatGenome genome , string fileName)
