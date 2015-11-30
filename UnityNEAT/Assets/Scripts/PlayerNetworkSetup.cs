@@ -219,7 +219,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [Command]
     void CmdSpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
     {
-        evolver.SpawnSeed(seedID, spawnPosition, eulerAngles);
+        evolver.SpawnSeedFromMutation(seedID, spawnPosition, eulerAngles);
     }
 
     [Command]

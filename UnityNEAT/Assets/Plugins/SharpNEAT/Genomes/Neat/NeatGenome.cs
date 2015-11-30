@@ -499,7 +499,7 @@ namespace SharpNeat.Genomes.Neat
                 int outcome = RouletteWheel.SingleThrow(rwlCurrent, _genomeFactory.Rng);
 
                 // In order to avoid boring looking shaped, first X generation we only add nodes/connections
-                if (BirthGeneration <= 5)
+                if (BirthGeneration <= 10)
                     outcome = BirthGeneration % 2 == 0 ? 2 : 1;
 
                 switch(outcome)
