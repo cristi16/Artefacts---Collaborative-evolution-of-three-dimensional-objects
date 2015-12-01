@@ -40,12 +40,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private int plantIconCount = 0;
     private bool hoveringOverSeed = false;
     private bool showingPlantIcon = false;
+    private bool isDraggingArtefact = false;
     private List<ArtefactSeed> collectedSeeds;
     private GameObject worldCanvas;
 
     private List<SeedSelection> seedSelections = new List<SeedSelection>();
     private ArtefactGhost placeholderArtefact;
-    private SpringJoint placeholderSpringJoint;
+    private Dragable draggedObject;
 
     public override void OnStartServer()
     {
@@ -138,6 +139,22 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     hoveringOverSeed = false;
                 }
             }
+
+            if (Physics.Raycast(ray, out hitInfo, pickUpDistance, LayerMask.GetMask("Artefact")) && !isDraggingArtefact)
+            {
+                hitInfo.collider.GetComponent<Highlighter>().On(Color.white);
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    PickupArtefact();
+                    return;
+                }
+            }
+
+            if (Input.GetMouseButtonDown(0) && isDraggingArtefact)
+            {
+                DropArtefact();
+            }
         }
         else
         {
@@ -146,8 +163,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 pickUpIcon.PopDown();
                 hoveringOverSeed = false;
             }
-        }
-
+        }     
 
         if (scrollView.transform.childCount == 0) return;
 
@@ -156,6 +172,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
+            if(isDraggingArtefact)
+                DropArtefact();
+
             selectSeedKey.GetComponent<Animation>().Play();
 
             int previousNumberOrSelectedSeeds = seedSelections.Count;
@@ -325,9 +344,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             default:
                 Debug.Log("Selected too many seeds!");
                 return;
-        }
-
-        
+        }      
     }
 
     private void InstantiatePlaceholder(string serializedGenome)
@@ -343,13 +360,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
             desiredPosition = new Vector3(desiredPosition.x, 0f, desiredPosition.z);
         placeholderArtefact.transform.position = desiredPosition;
 
-        placeholderArtefact.transform.localScale = Vector3.one * Artefact.k_seedScale;
-        placeholderArtefact.GetComponent<Rigidbody>().mass = 0.01f;
-
         placeholderArtefact.GetComponent<Highlighter>().ConstantOn(Color.white);
 
-        var draggable = placeholderArtefact.gameObject.AddComponent<Dragable>();
-        placeholderSpringJoint = draggable.StartDragging(placeholderSpringJoint);
+        draggedObject = placeholderArtefact.gameObject.AddComponent<Dragable>();
+        draggedObject.StartDragging();
     }
 
     void UpdateSeedAnimation(int previousCount)
@@ -371,4 +385,18 @@ public class PlayerNetworkSetup : NetworkBehaviour
         }
     }
 
+    void PickupArtefact()
+    {
+        isDraggingArtefact = true;
+        draggedObject = hitInfo.collider.gameObject.GetComponent<Dragable>();
+        draggedObject.StartDragging();
+        hitInfo.collider.GetComponent<Highlighter>().ConstantOn(Color.white);
+    }
+
+
+    void DropArtefact()
+    {
+        isDraggingArtefact = false;
+        draggedObject.StopDragging();     
+    }
 }

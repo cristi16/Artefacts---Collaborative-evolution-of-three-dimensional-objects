@@ -3,7 +3,7 @@ using UnityEngine.Networking;
 
 public class ArtefactSeed : Artefact
 {
-    public float spawnJumpForce = 700f;
+    public float spawnJumpForce = 30f;
 
     [HideInInspector, SyncVar]
     public uint ID;

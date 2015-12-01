@@ -59,8 +59,8 @@ public class Artefact : NetworkBehaviour
         DisplayMesh(mesh);
         Profiler.EndSample();
 
-        if(this.GetType() == typeof(Artefact))
-            StartCoroutine(Grow());
+        //if(this.GetType() == typeof(Artefact))
+        //    StartCoroutine(Grow());
     }
 
     void DisplayMesh(Mesh mesh)

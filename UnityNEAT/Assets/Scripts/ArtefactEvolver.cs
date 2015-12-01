@@ -36,6 +36,7 @@ public class ArtefactEvolver : NetworkBehaviour
 
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
+        // Perform a number of mutations on the initial genome so that it doesn't result in a boring looking cube
         //for (int i = 0; i < 10; i++)
         //    initialGenome = evolutionHelper.MutateGenome(initialGenome);
 
@@ -83,7 +84,7 @@ public class ArtefactEvolver : NetworkBehaviour
             var seedGenome = evolutionHelper.MutateGenome(genome);
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
-            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, artefactInstance.transform.position + direction * 2f, Quaternion.LookRotation(direction).eulerAngles);
+            var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, artefactInstance.transform.position + direction * 3f, Quaternion.LookRotation(direction).eulerAngles);
             seedInstance.ID = seedGenome.Id;
             seedInstance.facingDirection = direction;
 
