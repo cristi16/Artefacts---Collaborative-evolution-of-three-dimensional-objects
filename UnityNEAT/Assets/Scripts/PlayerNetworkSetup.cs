@@ -163,7 +163,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 pickUpIcon.PopDown();
                 hoveringOverSeed = false;
             }
-        }     
+        }
+
+        //if (isDraggingArtefact)
+        //{
+        //    draggedObject.transform.Rotate(new Vector3(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X"), 0f) * 500f * Time.deltaTime);
+        //}
 
         if (scrollView.transform.childCount == 0) return;
 
@@ -387,9 +392,14 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     void PickupArtefact()
     {
-        isDraggingArtefact = true;
         draggedObject = hitInfo.collider.gameObject.GetComponent<Dragable>();
+        if(draggedObject.IsDragging) return;
+
+        isDraggingArtefact = true;
+
         draggedObject.StartDragging();
+        CmdChangeAuthority(draggedObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, true);
+
         hitInfo.collider.GetComponent<Highlighter>().ConstantOn(Color.white);
     }
 
@@ -397,6 +407,26 @@ public class PlayerNetworkSetup : NetworkBehaviour
     void DropArtefact()
     {
         isDraggingArtefact = false;
-        draggedObject.StopDragging();     
+
+        draggedObject.StopDragging();
+        CmdChangeAuthority(draggedObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, false);
+    }
+
+    [Command]
+    void CmdChangeAuthority(NetworkInstanceId objectNetId, NetworkInstanceId playerNetId, bool assign)
+    {
+        var serverPlayer = NetworkServer.FindLocalObject(playerNetId);
+        var serverObject = NetworkServer.FindLocalObject(objectNetId);
+
+        if (assign)
+        {
+            serverObject.GetComponent<NetworkIdentity>()
+                .AssignClientAuthority(serverPlayer.GetComponent<NetworkIdentity>().connectionToClient);
+        }
+        else
+        {
+            serverObject.GetComponent<NetworkIdentity>()
+                .RemoveClientAuthority(serverPlayer.GetComponent<NetworkIdentity>().connectionToClient);
+        }
     }
 }

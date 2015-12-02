@@ -4,6 +4,7 @@ using System.Collections;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml;
+using HighlightingSystem;
 using SharpNeat.Core;
 using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
@@ -19,10 +20,10 @@ public class Artefact : NetworkBehaviour
     public const float k_artefactScale = 0.1326183f;
     public const float k_seedScale = 0.05f;
     public const float k_growthMove = 4f;
-    public const float k_growthTime = 3f;
+    public const float k_growthTime = 1.5f;
 
     private static ArtefactEvaluator.VoxelVolume m_voxelVolume = new ArtefactEvaluator.VoxelVolume() { width = 16, height = 16, length = 16 };
-
+    
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -59,8 +60,11 @@ public class Artefact : NetworkBehaviour
         DisplayMesh(mesh);
         Profiler.EndSample();
 
-        //if(this.GetType() == typeof(Artefact))
-        //    StartCoroutine(Grow());
+        if (this.GetType() == typeof (Artefact))
+        {
+            //StartCoroutine(Grow());
+            StartCoroutine(Glow());
+        }
     }
 
     void DisplayMesh(Mesh mesh)
@@ -77,6 +81,13 @@ public class Artefact : NetworkBehaviour
         //concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
         //concaveCollider.ComputeHulls(null, null);
         gameObject.AddComponent<MeshCollider>().convex = true;
+    }
+
+    IEnumerator Glow()
+    {
+        GetComponent<Highlighter>().FlashingOn();
+        yield return new WaitForSeconds(k_growthTime);
+        GetComponent<Highlighter>().FlashingOff();
     }
 
     IEnumerator Grow()
