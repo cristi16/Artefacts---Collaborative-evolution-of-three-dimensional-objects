@@ -17,6 +17,8 @@ public class ArtefactEvolver : NetworkBehaviour
     // maps seed unique ID to seed genome
     private Dictionary<uint, NeatGenome> seedsDictionary = new Dictionary<uint, NeatGenome>();
     private const int k_numberOfSeeds = 5;
+    private const int k_numberOfPreEvolutions = 10;
+    private const int k_numberOfInitialSeeds = 10;
 
     private uint idCount;
     private string serverStartTime;
@@ -35,10 +37,15 @@ public class ArtefactEvolver : NetworkBehaviour
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
         // Perform a number of mutations on the initial genome so that it doesn't result in a boring looking cube
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < k_numberOfPreEvolutions; i++)
             initialGenome = evolutionHelper.MutateGenome(initialGenome);
 
-        StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 0.5f, Vector3.zero));
+        for (int i = 0; i < k_numberOfInitialSeeds; i++)
+        {
+            var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
+            var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;
+            StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, direction * UnityEngine.Random.Range(15f, 50f), Quaternion.LookRotation(direction).eulerAngles));
+        }
     }
 
     public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName)
@@ -84,6 +91,9 @@ public class ArtefactEvolver : NetworkBehaviour
 
     IEnumerator SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition, Vector3 eulerAngles)
     {
+        // this is to ensure that the player is the first thing getting spawned
+        yield return new WaitForEndOfFrame();
+
         // Spawn Parent
         var artefactInstance = CreateArtefactInstance<Artefact>(genome, artefactPrefab, spawnPosition, eulerAngles);
         NetworkServer.Spawn(artefactInstance.gameObject);

@@ -459,7 +459,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [Command]
     public void CmdSaveArtefactColor(uint genomeID, float r, float g, float b)
     {
-        Statistics.Instance.artefacts[genomeID].color = new Color(r,g,b);
+        // no need to save colors for initial artefacts or artefactSeeds. Only for planted artefacts
+        if(Statistics.Instance.artefacts.ContainsKey(genomeID))
+            Statistics.Instance.artefacts[genomeID].color = new Color(r,g,b);
     }
 
     [Command]
