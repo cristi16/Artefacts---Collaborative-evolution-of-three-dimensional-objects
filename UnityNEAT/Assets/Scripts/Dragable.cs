@@ -10,8 +10,6 @@ public class Dragable : NetworkBehaviour
     [SyncVar]
     public bool IsDragging = false;
 
-    private float oldDrag;
-    private float oldAngularDrag;
     private Rigidbody body;
 
 
@@ -36,19 +34,22 @@ public class Dragable : NetworkBehaviour
     public void StopDragging()
     {
         IsDragging = false;
+        Stop();
         CmdStopDragging();
         GetComponent<Highlighter>().ConstantOff();
     }
 
     public void StartDragging()
     {
+        body = GetComponent<Rigidbody>();
+
         IsDragging = true;
+        Initialize();
         StartCoroutine(DragObject(k_DragDistance));
     }
 
     private IEnumerator DragObject(float distance)
     {
-
         while (IsDragging)
         {
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
@@ -76,17 +77,24 @@ public class Dragable : NetworkBehaviour
     [ClientRpc]
     void RpcInitialize()
     {
-        oldDrag = body.drag;
-        oldAngularDrag = body.angularDrag;
-        body.useGravity = false;
-        body.drag = 20f;
+        Initialize();
     }
     [ClientRpc]
     void RpcStop()
     {
+        Stop();
+    }
+
+    void Initialize()
+    {
+        body.useGravity = false;
+        body.drag = 20f;
+    }
+
+    void Stop()
+    {
         body.useGravity = true;
-        body.drag = oldDrag;
-        body.angularDrag = oldAngularDrag;
+        body.drag = 1f;
 
         body.velocity = Vector3.zero;
         body.angularVelocity = Vector3.zero;
