@@ -33,11 +33,14 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private ScrollViewLayout scrollView;
     private PopupUIElement seedAnimation;
     private PopupUIElement pickUpIcon;
+    private PopupUIElement moveArtefactIcon;
     private PopupUIElement plantIcon;
     private GameObject selectSeedKey;
     private ShowSideUI sideUI;
     private int pickupIconCount = 0;
+    private int moveArtefactCount = 0;
     private int plantIconCount = 0;
+    private bool hoveringOverArtefact = false;
     private bool hoveringOverSeed = false;
     private bool showingPlantIcon = false;
     private bool isDraggingArtefact = false;
@@ -75,6 +78,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             UpdateName();
 
             pickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
+            moveArtefactIcon = GameObject.FindGameObjectWithTag("MoveArtefactIcon").GetComponent<PopupUIElement>();
             plantIcon = GameObject.FindGameObjectWithTag("PlantIcon").GetComponent<PopupUIElement>();
             seedAnimation = GameObject.FindGameObjectWithTag("SeedAnimation").GetComponent<PopupUIElement>();
             selectSeedKey = GameObject.FindGameObjectWithTag("SelectSeedKey");
@@ -144,10 +148,25 @@ public class PlayerNetworkSetup : NetworkBehaviour
             {
                 hitInfo.collider.GetComponent<Highlighter>().On(Color.white);
 
+                if (!hoveringOverArtefact && moveArtefactCount < pickupIconMax)
+                {
+                    moveArtefactIcon.PopUp();
+                    hoveringOverArtefact = true;
+                    moveArtefactCount++;
+                }
+
                 if (Input.GetMouseButtonDown(0))
                 {
                     PickupArtefact();
                     return;
+                }
+            }
+            else
+            {
+                if (hoveringOverArtefact)
+                {
+                    moveArtefactIcon.PopDown();
+                    hoveringOverArtefact = false;
                 }
             }
 
@@ -162,6 +181,11 @@ public class PlayerNetworkSetup : NetworkBehaviour
             {
                 pickUpIcon.PopDown();
                 hoveringOverSeed = false;
+            }
+            if (hoveringOverArtefact)
+            {
+                moveArtefactIcon.PopDown();
+                hoveringOverArtefact = false;
             }
         }
 
