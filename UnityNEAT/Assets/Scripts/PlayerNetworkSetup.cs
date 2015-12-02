@@ -119,6 +119,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
+                    CmdPickedUpSeed();
                     hitInfo.collider.transform.rotation = Quaternion.identity;
                     hitInfo.collider.GetComponent<Rigidbody>().isKinematic = true;
                     hitInfo.collider.transform.parent = scrollView.transform;
@@ -225,7 +226,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (Input.GetMouseButtonDown(0) && seedSelections.Count > 0)
         {
             if(seedSelections.Count == 1)
-                CmdSpawnSeed(currentlySelectedSeed.ID, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);
+                CmdSpawnSeed(currentlySelectedSeed.GenomeId, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);
             else
                 CmdSpawnFromCrossoverResult(placeholderArtefact.SerializedGenome, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);    
 
@@ -233,7 +234,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             {
                 foreach (var seedSelection in seedSelections)
                 {
-                    CmdDestroySeed(seedSelection.seed.ID);
+                    CmdDestroySeed(seedSelection.seed.GenomeId);
                     CmdDestroySeedObject(seedSelection.seed.netId);
                     collectedSeeds.Remove(seedSelection.seed);
                     seedSelection.seed.transform.parent = null;
@@ -267,7 +268,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [Command]
     void CmdSpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
     {
-        evolver.SpawnSeedFromMutation(seedID, spawnPosition, eulerAngles);
+        evolver.SpawnSeedFromMutation(seedID, spawnPosition, eulerAngles, PlayerName);
     }
 
     [Command]
@@ -286,13 +287,14 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [Command]
     void CmdSpawnFromCrossoverResult(string serializedCrossoverResult, Vector3 spawnPosition, Vector3 eulerAngles)
     {
-        evolver.SpawnCrossoverResult(serializedCrossoverResult, spawnPosition, eulerAngles);
+        evolver.SpawnCrossoverResult(serializedCrossoverResult, spawnPosition, eulerAngles, PlayerName);
     }
 
     [Command]
     void CmdSetPlayerName(string name)
     {
         PlayerName = name;
+        Statistics.Instance.AddPlayer(name);
     }
 
     private void UpdateName()
@@ -452,5 +454,17 @@ public class PlayerNetworkSetup : NetworkBehaviour
             serverObject.GetComponent<NetworkIdentity>()
                 .RemoveClientAuthority(serverPlayer.GetComponent<NetworkIdentity>().connectionToClient);
         }
+    }
+
+    [Command]
+    public void CmdSaveArtefactColor(uint genomeID, float r, float g, float b)
+    {
+        Statistics.Instance.artefacts[genomeID].color = new Color(r,g,b);
+    }
+
+    [Command]
+    void CmdPickedUpSeed()
+    {
+        Statistics.Instance.players[PlayerName].numberOfSeedsPickedUp++;
     }
 }

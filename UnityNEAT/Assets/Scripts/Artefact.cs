@@ -16,6 +16,7 @@ public class Artefact : NetworkBehaviour
     public Material artefactMaterial;
 
     [HideInInspector, SyncVar] public string SerializedGenome;
+    [HideInInspector, SyncVar] public uint GenomeId;
 
     public const float k_artefactScale = 0.1326183f;
     public const float k_seedScale = 0.05f;
@@ -59,6 +60,9 @@ public class Artefact : NetworkBehaviour
         Profiler.BeginSample("Display");
         DisplayMesh(mesh);
         Profiler.EndSample();
+
+        var localClient = ClientScene.localPlayers[0].gameObject.GetComponent<PlayerNetworkSetup>();
+        localClient.CmdSaveArtefactColor(GenomeId, ArtefactEvaluator.artefactColor.r, ArtefactEvaluator.artefactColor.g, ArtefactEvaluator.artefactColor.b);
 
         if (this.GetType() == typeof (Artefact))
         {

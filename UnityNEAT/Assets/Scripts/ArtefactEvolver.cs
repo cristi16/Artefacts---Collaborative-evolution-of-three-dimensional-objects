@@ -22,8 +22,6 @@ public class ArtefactEvolver : NetworkBehaviour
     private string serverStartTime;
     private string savePath;
 
-    private Statistics statistics = new Statistics();
-
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -37,20 +35,27 @@ public class ArtefactEvolver : NetworkBehaviour
         // Spawn Initial Artefact
         var initialGenome = evolutionHelper.CreateInitialGenome();
         // Perform a number of mutations on the initial genome so that it doesn't result in a boring looking cube
-        //for (int i = 0; i < 10; i++)
-        //    initialGenome = evolutionHelper.MutateGenome(initialGenome);
+        for (int i = 0; i < 10; i++)
+            initialGenome = evolutionHelper.MutateGenome(initialGenome);
 
         StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 0.5f, Vector3.zero));
     }
 
-    public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
+    public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName)
     {
         StartCoroutine(SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition, eulerAngles));
 
-        //SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
+        SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
+
+        Statistics.Instance.totalOfPlantedArtefacts++;
+        Statistics.Instance.AddArtefact(seedID, seedsDictionary[seedID].BirthGeneration);
+        var playerStatistics = Statistics.Instance.players[playerName];
+        playerStatistics.numberOfPlanedArtefact++;
+        playerStatistics.numberOfMutations++;
+        playerStatistics.plantedObjects.Add(seedID);
     }
 
-    public void SpawnCrossoverResult(string serializedGenome, Vector3 spawnPosition, Vector3 eulerAngles)
+    public void SpawnCrossoverResult(string serializedGenome, Vector3 spawnPosition, Vector3 eulerAngles, string playerName)
     {
         var genome = NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(serializedGenome)), true);
         genome.GenomeFactory = evolutionHelper.GenomeFactory;
@@ -62,7 +67,14 @@ public class ArtefactEvolver : NetworkBehaviour
 
         StartCoroutine(SpawnArtefactWithSeeds(validGenome, spawnPosition, eulerAngles));
 
-        //SaveGenome(validGenome, validGenome.Id + ".gnm.xml");
+        SaveGenome(validGenome, validGenome.Id + ".gnm.xml");
+
+        Statistics.Instance.totalOfPlantedArtefacts++;
+        Statistics.Instance.AddArtefact(validGenome.Id, validGenome.BirthGeneration);
+        var playerStatistics = Statistics.Instance.players[playerName];
+        playerStatistics.numberOfPlanedArtefact++;
+        playerStatistics.numberOfCrossovers++;
+        playerStatistics.plantedObjects.Add(validGenome.Id);
     }
 
     public void DeleteSeed(uint seedID)
@@ -85,12 +97,11 @@ public class ArtefactEvolver : NetworkBehaviour
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
             var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, artefactInstance.transform.position + direction * 3f, Quaternion.LookRotation(direction).eulerAngles);
-            seedInstance.ID = seedGenome.Id;
             seedInstance.facingDirection = direction;
 
             NetworkServer.Spawn(seedInstance.gameObject);
 
-            seedsDictionary.Add(seedInstance.ID, seedGenome);      
+            seedsDictionary.Add(seedInstance.GenomeId, seedGenome);      
         }
     }
 
@@ -104,6 +115,7 @@ public class ArtefactEvolver : NetworkBehaviour
 
         var artefact = artefactInstance.GetComponent<T>();
         artefact.SerializedGenome = serializedGenome;
+        artefact.GenomeId = genome.Id;
         artefact.transform.position = initialPosition;
         artefact.transform.eulerAngles = initialRotation;
         return artefact;
