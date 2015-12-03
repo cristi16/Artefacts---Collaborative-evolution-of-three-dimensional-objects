@@ -10,6 +10,7 @@ using SharpNeat.Decoders;
 using SharpNeat.Decoders.Neat;
 using SharpNeat.Genomes.Neat;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class Artefact : NetworkBehaviour
 {
@@ -71,6 +72,9 @@ public class Artefact : NetworkBehaviour
             //StartCoroutine(Grow());
             StartCoroutine(Glow());
         }
+
+        //var countText = GameObject.FindGameObjectWithTag("ArtefactCounter").GetComponent<Text>();
+        //countText.text =  "" + (int.Parse(countText.text) + 1);
     }
 
     IEnumerator WaitForPlayer()
