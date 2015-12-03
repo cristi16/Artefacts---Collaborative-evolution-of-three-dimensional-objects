@@ -40,14 +40,9 @@ public class ArtefactEvolver : NetworkBehaviour
         for (int i = 0; i < k_numberOfPreEvolutions; i++)
             initialGenome = evolutionHelper.MutateGenome(initialGenome);
 
-        for (int i = 0; i < k_numberOfInitialSeeds; i++)
-        {
-            var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
-            var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;
-            StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, direction * UnityEngine.Random.Range(15f, 50f), Quaternion.LookRotation(direction).eulerAngles, initialGenome.Id));
-        }
-
-        StartCoroutine(SaveStatistics());
+        StartCoroutine(SpawnInitialArtefacts(initialGenome));
+        //StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5, Quaternion.identity.eulerAngles, initialGenome.Id));
+        //StartCoroutine(SaveStatistics());
     }
 
     public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName, uint parent)
@@ -175,5 +170,16 @@ public class ArtefactEvolver : NetworkBehaviour
         base.OnNetworkDestroy();
         Statistics.Instance.Serialize(savePath);
         Debug.Log("Server destroyed");
+    }
+
+    IEnumerator SpawnInitialArtefacts(NeatGenome initialGenome)
+    {
+        for (int i = 0; i < k_numberOfInitialSeeds; i++)
+        {
+            yield return new WaitForEndOfFrame();
+            var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
+            var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;
+            StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, direction * UnityEngine.Random.Range(15f, 50f), Quaternion.LookRotation(direction).eulerAngles, initialGenome.Id));
+        }
     }
 }

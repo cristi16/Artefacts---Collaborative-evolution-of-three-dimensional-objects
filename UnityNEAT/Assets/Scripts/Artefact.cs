@@ -63,9 +63,7 @@ public class Artefact : NetworkBehaviour
         DisplayMesh(mesh);
         Profiler.EndSample();
 
-        var localClient = ClientScene.localPlayers[0].gameObject.GetComponent<PlayerNetworkSetup>();
-        localClient.CmdSaveArtefactColor(GenomeId, ArtefactEvaluator.artefactColor.r, ArtefactEvaluator.artefactColor.g, ArtefactEvaluator.artefactColor.b);
-        localClient.CmdSaveSpawnPosition(GenomeId, transform.position);
+        StartCoroutine(WaitForPlayer());
 
 
         if (this.GetType() == typeof (Artefact))
@@ -73,6 +71,15 @@ public class Artefact : NetworkBehaviour
             //StartCoroutine(Grow());
             StartCoroutine(Glow());
         }
+    }
+
+    IEnumerator WaitForPlayer()
+    {
+        while (ClientScene.localPlayers[0].gameObject == null)
+            yield return null;
+        var localClient = ClientScene.localPlayers[0].gameObject.GetComponent<PlayerNetworkSetup>();
+        localClient.CmdSaveArtefactColor(GenomeId, ArtefactEvaluator.artefactColor.r, ArtefactEvaluator.artefactColor.g, ArtefactEvaluator.artefactColor.b);
+        localClient.CmdSaveSpawnPosition(GenomeId, transform.position);
     }
 
     void DisplayMesh(Mesh mesh)

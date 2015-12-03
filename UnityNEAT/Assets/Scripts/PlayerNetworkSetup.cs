@@ -92,10 +92,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
         {
             if(gameObject.name != PlayerName)
                 UpdateName();
-
-            var directionToPlayer = transform.position - ClientScene.localPlayers[0].gameObject.transform.position;
-            if(directionToPlayer != Vector3.zero)
-                worldCanvas.transform.rotation = Quaternion.LookRotation(directionToPlayer);
+            //if (ClientScene.localPlayers[0].gameObject != null)
+            //{
+                var directionToPlayer = transform.position - ClientScene.localPlayers[0].gameObject.transform.position;
+                if(directionToPlayer != Vector3.zero)
+                    worldCanvas.transform.rotation = Quaternion.LookRotation(directionToPlayer);
+            //}
             return;
         }
 
