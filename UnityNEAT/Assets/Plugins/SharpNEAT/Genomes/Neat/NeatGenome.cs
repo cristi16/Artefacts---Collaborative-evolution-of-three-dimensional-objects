@@ -725,8 +725,12 @@ namespace SharpNeat.Genomes.Neat
 
                     // Valid target nodes are all hidden and output nodes.
                     int tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount-1);
-                    
-                    if(srcNeuronIdx == tgtNeuronIdx)  {
+
+                    // exclude color outputs if we are within first X gen
+                    if(BirthGeneration < 5)
+                        tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount - 4);
+
+                    if (srcNeuronIdx == tgtNeuronIdx)  {
                         if(++tgtNeuronIdx == neuronCount) {
                             // Wrap around to first possible target neuron (first output).
                             // ENHANCEMENT: Devise more efficient strategy. This can still select the same node as source and target (the cyclic conenction is tested for below). 
