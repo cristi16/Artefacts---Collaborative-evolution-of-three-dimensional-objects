@@ -36,6 +36,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private PopupUIElement moveArtefactIcon;
     private PopupUIElement plantIcon;
     private GameObject selectSeedKey;
+    private GameObject seedUIborder;
+    private bool playedseedUIHighlight = false;
     private ShowSideUI sideUI;
     private int pickupIconCount = 0;
     private int moveArtefactCount = 0;
@@ -82,6 +84,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             plantIcon = GameObject.FindGameObjectWithTag("PlantIcon").GetComponent<PopupUIElement>();
             seedAnimation = GameObject.FindGameObjectWithTag("SeedAnimation").GetComponent<PopupUIElement>();
             selectSeedKey = GameObject.FindGameObjectWithTag("SelectSeedKey");
+            seedUIborder = GameObject.FindGameObjectWithTag("SeedUIBorder");
             sideUI = GameObject.FindGameObjectWithTag("SideUI").GetComponent<ShowSideUI>();
         }
     }
@@ -134,6 +137,11 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
 
                     sideUI.ShowUI(collectedSeeds.Count);
+                    if (collectedSeeds.Count == 2 && playedseedUIHighlight == false)
+                    {
+                        playedseedUIHighlight = true;
+                        seedUIborder.GetComponent<Animator>().SetTrigger("show");
+                    }
 
                     return;
                 }
@@ -256,6 +264,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
                         scrollView.MoveToIndex(minIndex - 1);
                 }
             }
+
+            seedAnimation.PopDown();
+            seedAnimation.transform.GetChild(2).gameObject.SetActive(false);
 
             Destroy(placeholderArtefact.gameObject);
             seedSelections.Clear();
