@@ -44,13 +44,13 @@ public class ArtefactEvolver : NetworkBehaviour
         {
             var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
             var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;
-            StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, direction * UnityEngine.Random.Range(15f, 50f), Quaternion.LookRotation(direction).eulerAngles));
+            StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, direction * UnityEngine.Random.Range(15f, 50f), Quaternion.LookRotation(direction).eulerAngles, initialGenome.Id));
         }
     }
 
-    public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName)
+    public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName, uint parent)
     {
-        StartCoroutine(SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition, eulerAngles));
+        StartCoroutine(SpawnArtefactWithSeeds(seedsDictionary[seedID], spawnPosition, eulerAngles, parent));
 
         SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
 
@@ -60,9 +60,10 @@ public class ArtefactEvolver : NetworkBehaviour
         playerStatistics.numberOfPlanedArtefact++;
         playerStatistics.numberOfMutations++;
         playerStatistics.plantedObjects.Add(seedID);
+        Statistics.Instance.artefacts[seedID].usersInteracted.Add(playerName);
     }
 
-    public void SpawnCrossoverResult(string serializedGenome, Vector3 spawnPosition, Vector3 eulerAngles, string playerName)
+    public void SpawnCrossoverResult(string serializedGenome, Vector3 spawnPosition, Vector3 eulerAngles, string playerName, uint parent1, uint parent2)
     {
         var genome = NeatGenomeXmlIO.ReadGenome(XmlReader.Create(new StringReader(serializedGenome)), true);
         genome.GenomeFactory = evolutionHelper.GenomeFactory;
@@ -72,7 +73,7 @@ public class ArtefactEvolver : NetworkBehaviour
         var validGenome = evolutionHelper.GenomeFactory.CreateGenomeCopy(genome,
             evolutionHelper.GenomeFactory.NextGenomeId(), genome.BirthGeneration);
 
-        StartCoroutine(SpawnArtefactWithSeeds(validGenome, spawnPosition, eulerAngles));
+        StartCoroutine(SpawnArtefactWithSeeds(validGenome, spawnPosition, eulerAngles, parent1, parent2));
 
         SaveGenome(validGenome, validGenome.Id + ".gnm.xml");
 
@@ -82,6 +83,7 @@ public class ArtefactEvolver : NetworkBehaviour
         playerStatistics.numberOfPlanedArtefact++;
         playerStatistics.numberOfCrossovers++;
         playerStatistics.plantedObjects.Add(validGenome.Id);
+        Statistics.Instance.artefacts[validGenome.Id].usersInteracted.Add(playerName);
     }
 
     public void DeleteSeed(uint seedID)
@@ -89,13 +91,23 @@ public class ArtefactEvolver : NetworkBehaviour
         seedsDictionary.Remove(seedID);
     }
 
-    IEnumerator SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition, Vector3 eulerAngles)
+    IEnumerator SpawnArtefactWithSeeds(NeatGenome genome, Vector3 spawnPosition, Vector3 eulerAngles, uint parent1 = 0, uint parent2 = 0)
     {
         // this is to ensure that the player is the first thing getting spawned
         yield return new WaitForEndOfFrame();
 
         // Spawn Parent
         var artefactInstance = CreateArtefactInstance<Artefact>(genome, artefactPrefab, spawnPosition, eulerAngles);
+
+        artefactInstance.Parent1Id = parent1;
+        artefactInstance.Parent1Id = parent2;
+        Statistics.Instance.artefacts[genome.Id].AddParents(parent1, parent2);
+        Statistics.Instance.artefacts[genome.Id].AddUsersFromParents(parent1, parent2);
+        if (parent1 != 0)
+            Statistics.Instance.artefacts[parent1].numberOfSeedsReplanted++;
+        if (parent2 != 0)
+            Statistics.Instance.artefacts[parent2].numberOfSeedsReplanted++;
+
         NetworkServer.Spawn(artefactInstance.gameObject);
 
         yield return new WaitForSeconds(Artefact.k_growthTime);
@@ -108,6 +120,9 @@ public class ArtefactEvolver : NetworkBehaviour
 
             var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, artefactInstance.transform.position + direction * 3f, Quaternion.LookRotation(direction).eulerAngles);
             seedInstance.facingDirection = direction;
+
+            seedInstance.Parent1Id = genome.Id;
+            seedInstance.Parent2Id = genome.Id;
 
             NetworkServer.Spawn(seedInstance.gameObject);
 

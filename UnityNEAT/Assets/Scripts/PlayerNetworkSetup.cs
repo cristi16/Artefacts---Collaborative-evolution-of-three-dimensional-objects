@@ -226,9 +226,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (Input.GetMouseButtonDown(0) && seedSelections.Count > 0)
         {
             if(seedSelections.Count == 1)
-                CmdSpawnSeed(currentlySelectedSeed.GenomeId, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);
+                CmdSpawnSeed(currentlySelectedSeed.GenomeId, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles, currentlySelectedSeed.Parent1Id);
             else
-                CmdSpawnFromCrossoverResult(placeholderArtefact.SerializedGenome, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles);    
+                CmdSpawnFromCrossoverResult(placeholderArtefact.SerializedGenome, placeholderArtefact.transform.position, 
+                    placeholderArtefact.transform.eulerAngles, seedSelections[0].seed.Parent1Id, seedSelections[1].seed.Parent1Id);    
 
             if (destroySeedsOnPlacement)
             {
@@ -266,9 +267,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
     }
 
     [Command]
-    void CmdSpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles)
+    void CmdSpawnSeed(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, uint parent)
     {
-        evolver.SpawnSeedFromMutation(seedID, spawnPosition, eulerAngles, PlayerName);
+        evolver.SpawnSeedFromMutation(seedID, spawnPosition, eulerAngles, PlayerName, parent);
     }
 
     [Command]
@@ -285,9 +286,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
     }
 
     [Command]
-    void CmdSpawnFromCrossoverResult(string serializedCrossoverResult, Vector3 spawnPosition, Vector3 eulerAngles)
+    void CmdSpawnFromCrossoverResult(string serializedCrossoverResult, Vector3 spawnPosition, Vector3 eulerAngles, uint parent1, uint parent2)
     {
-        evolver.SpawnCrossoverResult(serializedCrossoverResult, spawnPosition, eulerAngles, PlayerName);
+        evolver.SpawnCrossoverResult(serializedCrossoverResult, spawnPosition, eulerAngles, PlayerName, parent1, parent2);
     }
 
     [Command]
@@ -462,6 +463,14 @@ public class PlayerNetworkSetup : NetworkBehaviour
         // no need to save colors for initial artefacts or artefactSeeds. Only for planted artefacts
         if(Statistics.Instance.artefacts.ContainsKey(genomeID))
             Statistics.Instance.artefacts[genomeID].color = new Color(r,g,b);
+    }
+
+    [Command]
+    public void CmdSaveSpawnPosition(uint genomeID, Vector3 position)
+    {
+        // no need to save position for initial artefacts or artefactSeeds. Only for planted artefacts
+        if (Statistics.Instance.artefacts.ContainsKey(genomeID))
+            Statistics.Instance.artefacts[genomeID].spawnPosition = position;
     }
 
     [Command]

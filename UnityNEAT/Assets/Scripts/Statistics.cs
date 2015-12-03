@@ -5,17 +5,17 @@ using System.Collections.Generic;
 public class Statistics
 {
     public int totalOfPlantedArtefacts;
-    public int maxGeneration;
+    public uint maxGeneration;
 
     // players identified based on username
     public Dictionary<string, UserStatistics> players;
     // planted artefacts based on genomeID
     public Dictionary<uint, ArtefactStatistics> artefacts;
 
-    // This collection keeps track of the number of planted objects associated with one color
+    // This collection represents the distribution of artefacts over color
     public Dictionary<Color, int> colorDistribution;
-
-    public Dictionary<int, int> numberOfObjectsPerGeneration;
+    //This collection represents the distribution of artefacts over generations
+    public Dictionary<uint, int> numberOfObjectsPerGeneration;
 
     private static Statistics _instance;
     public static Statistics Instance
@@ -47,5 +47,12 @@ public class Statistics
     public void AddArtefact(uint genomeID, uint generation)
     {
         artefacts.Add(genomeID, new ArtefactStatistics(genomeID, generation));
+
+        totalOfPlantedArtefacts++;
+
+        if (generation > maxGeneration)
+            maxGeneration = generation;
     }
+
+
 }
