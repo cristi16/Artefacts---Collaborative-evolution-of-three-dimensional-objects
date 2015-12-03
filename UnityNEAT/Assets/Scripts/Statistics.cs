@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
 
 public class Statistics
 {
@@ -13,7 +15,7 @@ public class Statistics
     public Dictionary<uint, ArtefactStatistics> artefacts;
 
     // This collection represents the distribution of artefacts over color
-    public Dictionary<Color, int> colorDistribution;
+    public Dictionary<Vector3, int> colorDistribution;
     //This collection represents the distribution of artefacts over generations
     public Dictionary<uint, int> numberOfObjectsPerGeneration;
 
@@ -54,5 +56,8 @@ public class Statistics
             maxGeneration = generation;
     }
 
-
+    public void Serialize(string path)
+    {
+        File.WriteAllText(path + "/statistics.txt", JsonConvert.SerializeObject(this));
+    }
 }

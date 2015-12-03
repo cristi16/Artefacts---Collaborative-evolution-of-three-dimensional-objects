@@ -462,7 +462,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     {
         // no need to save colors for initial artefacts or artefactSeeds. Only for planted artefacts
         if(Statistics.Instance.artefacts.ContainsKey(genomeID))
-            Statistics.Instance.artefacts[genomeID].color = new Color(r,g,b);
+            Statistics.Instance.artefacts[genomeID].color = new Vector3(r,g,b);
     }
 
     [Command]

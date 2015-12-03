@@ -46,6 +46,8 @@ public class ArtefactEvolver : NetworkBehaviour
             var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;
             StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, direction * UnityEngine.Random.Range(15f, 50f), Quaternion.LookRotation(direction).eulerAngles, initialGenome.Id));
         }
+
+        StartCoroutine(SaveStatistics());
     }
 
     public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName, uint parent)
@@ -101,11 +103,14 @@ public class ArtefactEvolver : NetworkBehaviour
 
         artefactInstance.Parent1Id = parent1;
         artefactInstance.Parent1Id = parent2;
-        Statistics.Instance.artefacts[genome.Id].AddParents(parent1, parent2);
-        Statistics.Instance.artefacts[genome.Id].AddUsersFromParents(parent1, parent2);
-        if (parent1 != 0)
+        if (Statistics.Instance.artefacts.ContainsKey(genome.Id))
+        {
+            Statistics.Instance.artefacts[genome.Id].AddParents(parent1, parent2);
+            Statistics.Instance.artefacts[genome.Id].AddUsersFromParents(parent1, parent2);
+        }
+        if (Statistics.Instance.artefacts.ContainsKey(parent1))
             Statistics.Instance.artefacts[parent1].numberOfSeedsReplanted++;
-        if (parent2 != 0)
+        if (Statistics.Instance.artefacts.ContainsKey(parent2))
             Statistics.Instance.artefacts[parent2].numberOfSeedsReplanted++;
 
         NetworkServer.Spawn(artefactInstance.gameObject);
@@ -154,5 +159,21 @@ public class ArtefactEvolver : NetworkBehaviour
         {
             NeatGenomeXmlIO.WriteComplete(xw, genome, true);
         }
+    }
+
+    IEnumerator SaveStatistics()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(10f);
+            //Statistics.Instance.Serialize(serverStartTime);
+        }
+    }
+
+    public override void OnNetworkDestroy()
+    {
+        base.OnNetworkDestroy();
+        Statistics.Instance.Serialize(savePath);
+        Debug.Log("Server destroyed");
     }
 }
