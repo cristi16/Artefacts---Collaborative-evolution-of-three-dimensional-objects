@@ -42,7 +42,7 @@ public class ArtefactEvolver : NetworkBehaviour
 
         StartCoroutine(SpawnInitialArtefacts(initialGenome));
         //StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5, Quaternion.identity.eulerAngles, initialGenome.Id));
-        //StartCoroutine(SaveStatistics());
+        StartCoroutine(SaveStatistics());
     }
 
     public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName, uint parent)
@@ -178,8 +178,10 @@ public class ArtefactEvolver : NetworkBehaviour
         {
             yield return new WaitForEndOfFrame();
             var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
-            var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;
-            StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, direction * UnityEngine.Random.Range(15f, 50f), Quaternion.LookRotation(direction).eulerAngles, initialGenome.Id));
+            var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;         
+            var position = direction * UnityEngine.Random.Range(15f, 50f);
+            position.y = 2f;
+            StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, position, Quaternion.LookRotation(direction).eulerAngles, initialGenome.Id));
         }
     }
 }
