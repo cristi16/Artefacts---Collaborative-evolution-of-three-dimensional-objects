@@ -13,5 +13,6 @@ public class DeletePrefs : MonoBehaviour
     public void Delete()
     {
         PlayerPrefs.DeleteAll();
+        FindObjectOfType<NetworkInitializer>().ShowInputField();
     }
 }

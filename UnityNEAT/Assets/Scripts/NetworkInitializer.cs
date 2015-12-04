@@ -28,16 +28,7 @@ public class NetworkInitializer : MonoBehaviour
         // This allows us to send as much data as possible. However this means that connection to server will be slow if the servers keeps track of a lot of objects
         networkManager.connectionConfig.MaxSentMessageQueueSize = UInt16.MaxValue;
 
-        // Set name field if name has been previously saved
-        if (PlayerPrefs.HasKey("PlayerName"))
-        {
-            nameField.gameObject.SetActive(false);
-            welcomeBackText.gameObject.SetActive(true);
-            welcomeBackText.text += PlayerPrefs.GetString("PlayerName");
-        }
-
-        nameField.Select();
-        nameField.ActivateInputField();
+        ActivateInputField();
 
         // Use the matchmaker
         if (useMatchmaking)
@@ -69,6 +60,30 @@ public class NetworkInitializer : MonoBehaviour
 	        }
 	    }
 	}
+
+    public void ActivateInputField()
+    {
+        // Set name field if name has been previously saved
+        if (PlayerPrefs.HasKey("PlayerName"))
+        {
+            nameField.gameObject.SetActive(false);
+            welcomeBackText.gameObject.SetActive(true);
+            welcomeBackText.text += PlayerPrefs.GetString("PlayerName");
+        }
+
+        nameField.Select();
+        nameField.ActivateInputField();
+    }
+
+    public void ShowInputField()
+    {
+        nameField.text = "";
+        nameField.gameObject.SetActive(true);
+        welcomeBackText.gameObject.SetActive(false);
+
+        nameField.Select();
+        nameField.ActivateInputField();
+    }
 
     void Update()
     {
