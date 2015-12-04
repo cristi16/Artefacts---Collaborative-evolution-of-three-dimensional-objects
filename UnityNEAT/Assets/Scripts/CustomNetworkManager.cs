@@ -5,10 +5,13 @@ using System.Net.Sockets;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 using UnityEngine.Networking.Types;
+using UnityEngine.UI;
 
 public class CustomNetworkManager : NetworkManager
 {
+    public string serverAddress = "localhost";
     public bool hostServer;
+    public InputField ipField;
     void Start()
     {
         if (hostServer)
@@ -23,6 +26,11 @@ public class CustomNetworkManager : NetworkManager
                 }
             }
             networkAddress = localIP;
+            ipField.text = networkAddress;
+        }
+        else
+        {
+            ipField.text = networkAddress;
         }
     }
 

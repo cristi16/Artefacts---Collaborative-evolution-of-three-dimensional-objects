@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class NetworkInitializer : MonoBehaviour
 {
+    public InputField ipField;
     public Text welcomeBackText;
     public InputField nameField;
     public Button connectButton;
@@ -92,8 +93,15 @@ public class NetworkInitializer : MonoBehaviour
         ConnectAs(ConnectionType.Client);   
     }
 
+    public void ConnectAsHost()
+    {
+        ConnectAs(ConnectionType.Host);
+    }
+
     private void ConnectAs(ConnectionType connectionType, MatchInfo matchInfo = null)
     {
+        networkManager.networkAddress = ipField.text;
+
         switch (connectionType)
         {
                 case ConnectionType.Client:

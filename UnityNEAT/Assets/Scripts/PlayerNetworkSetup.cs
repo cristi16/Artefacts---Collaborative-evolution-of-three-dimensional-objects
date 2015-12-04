@@ -52,6 +52,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private List<SeedSelection> seedSelections = new List<SeedSelection>();
     private ArtefactGhost placeholderArtefact;
     private Dragable draggedObject;
+    private FirstPersonController controller;
 
     public override void OnStartServer()
     {
@@ -86,6 +87,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             selectSeedKey = GameObject.FindGameObjectWithTag("SelectSeedKey");
             seedUIborder = GameObject.FindGameObjectWithTag("SeedUIBorder");
             sideUI = GameObject.FindGameObjectWithTag("SideUI").GetComponent<ShowSideUI>();
+            controller = GetComponentInChildren<FirstPersonController>();
         }
     }
 
@@ -105,7 +107,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
         }
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F))
-            GetComponent<FirstPersonController>().IsFrozen = !GetComponent<FirstPersonController>().IsFrozen;
+            controller.IsFrozen = !controller.IsFrozen;
+
+        controller.IsFrozen = Input.GetMouseButton(1);
 
         if (seedSelections.Count == 0)
         {
@@ -408,6 +412,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         placeholderArtefact.GetComponent<Highlighter>().ConstantOn(Color.white);
 
         draggedObject = placeholderArtefact.gameObject.AddComponent<Dragable>();
+        draggedObject.playerTransform = transform;
         draggedObject.StartDragging();
     }
 
@@ -437,6 +442,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         isDraggingArtefact = true;
 
+        draggedObject.playerTransform = this.transform;
         draggedObject.StartDragging();
         CmdChangeAuthority(draggedObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, true);
 

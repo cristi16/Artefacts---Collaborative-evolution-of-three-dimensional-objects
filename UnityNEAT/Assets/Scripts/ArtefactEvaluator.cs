@@ -97,7 +97,7 @@ public class ArtefactEvaluator
         // Either save network to disk, look and see what's wrong or maybe if this happens on the client it could request another regeneration.
         if (Mathf.Approximately(minOutputValue, maxOutputValue))
         {
-            Debug.LogWarning("All output values are the same! Min equals max!");
+            //Debug.LogWarning("All output values are the same! Min equals max!");
         }
 
         for (int index00 = 1; index00 < processedOutput.GetLength(0) - 1; index00++)

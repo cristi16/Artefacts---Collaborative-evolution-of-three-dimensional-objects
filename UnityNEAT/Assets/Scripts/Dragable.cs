@@ -10,6 +10,8 @@ public class Dragable : NetworkBehaviour
     [SyncVar]
     public bool IsDragging = false;
 
+    public Transform playerTransform;
+
     private Rigidbody body;
 
 
@@ -56,6 +58,30 @@ public class Dragable : NetworkBehaviour
             var desiredPosition = ray.GetPoint(distance);
             var force = (desiredPosition - transform.position) * 1000;
             body.AddForce(force);
+
+            if (Input.GetMouseButton(1))
+            {
+                if (Input.GetKey(KeyCode.W))
+                {
+                    body.AddTorque(playerTransform.right * 5000 * Time.deltaTime);
+                }
+
+                if (Input.GetKey(KeyCode.S))
+                {
+                    body.AddTorque(-playerTransform.right * 5000 * Time.deltaTime);
+                }
+
+                if (Input.GetKey(KeyCode.A))
+                {
+                    body.AddTorque(playerTransform.up * 5000 * Time.deltaTime);
+                }
+
+                if (Input.GetKey(KeyCode.D))
+                {
+                    body.AddTorque(-playerTransform.up * 5000 * Time.deltaTime);
+                }
+            }
+
             yield return null;
         }
     }
