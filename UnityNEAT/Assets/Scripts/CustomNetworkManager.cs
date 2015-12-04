@@ -9,7 +9,6 @@ using UnityEngine.UI;
 
 public class CustomNetworkManager : NetworkManager
 {
-    public string serverAddress = "localhost";
     public bool hostServer;
     public InputField ipField;
     void Start()
