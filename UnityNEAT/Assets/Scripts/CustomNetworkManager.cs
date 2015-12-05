@@ -33,6 +33,12 @@ public class CustomNetworkManager : NetworkManager
         }
     }
 
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Escape) && IsClientConnected())
+            StopClient();    
+    }
+
     //public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
     //{
     //    Transform startPosition = this.GetStartPosition();

@@ -24,7 +24,10 @@ public class NetworkInitializer : MonoBehaviour
 
     void Start ()
 	{
-	    networkManager = FindObjectOfType<CustomNetworkManager>();
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        networkManager = FindObjectOfType<CustomNetworkManager>();
         // This allows us to send as much data as possible. However this means that connection to server will be slow if the servers keeps track of a lot of objects
         networkManager.connectionConfig.MaxSentMessageQueueSize = UInt16.MaxValue;
 
