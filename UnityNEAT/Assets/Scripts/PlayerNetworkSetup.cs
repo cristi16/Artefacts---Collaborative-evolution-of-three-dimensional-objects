@@ -139,6 +139,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     scrollView.Reset();
 
                     collectedSeeds.Add(hitInfo.collider.GetComponent<ArtefactSeed>());
+                    CmdHideSeed(hitInfo.collider.GetComponent<NetworkIdentity>().netId);
 
                     sideUI.ShowUI(collectedSeeds.Count);
                     if (collectedSeeds.Count == 2 && playedseedUIHighlight == false)
@@ -240,7 +241,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (Input.GetMouseButtonDown(0) && seedSelections.Count > 0)
         {
             if(seedSelections.Count == 1)
-                CmdSpawnSeed(currentlySelectedSeed.GenomeId, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles, currentlySelectedSeed.Parent1Id);
+                CmdSpawnSeed(seedSelections[0].seed.GenomeId, placeholderArtefact.transform.position, placeholderArtefact.transform.eulerAngles, seedSelections[0].seed.Parent1Id);
             else
                 CmdSpawnFromCrossoverResult(placeholderArtefact.SerializedGenome, placeholderArtefact.transform.position, 
                     placeholderArtefact.transform.eulerAngles, seedSelections[0].seed.Parent1Id, seedSelections[1].seed.Parent1Id);    
@@ -257,15 +258,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
                 if (seedSelections.Count == 1)
                 {
-                    if (seedSelections[0].indexInInventory > 0)
-                        scrollView.MoveToIndex(seedSelections[0].indexInInventory - 1);
+                    scrollView.MoveToIndex(seedSelections[0].indexInInventory  > 0 ? seedSelections[0].indexInInventory  - 1 : 0);
                 }
                 else
                 {
                     var minIndex = seedSelections.Select(seedSelection => seedSelection.indexInInventory).Min();
 
-                    if(minIndex > 0)
-                        scrollView.MoveToIndex(minIndex - 1);
+                    scrollView.MoveToIndex(minIndex > 0 ? minIndex - 1 : 0);
                 }
             }
 
@@ -497,4 +496,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
     {
         Statistics.Instance.players[PlayerName].numberOfSeedsPickedUp++;
     }
+
+    [Command]
+    void CmdHideSeed(NetworkInstanceId netId)
+    {
+        // When a client picks up a seed it goes in the inventory. The object is not destroyed though so it will still exist on the other clients.
+        //Ideally we should create a copy and destroy the network objects. However, for now, we just move it far away so the other clients can't see it and pick it up.
+        NetworkServer.FindLocalObject(netId).transform.position = Vector3.up*10000f;
+    }
+
 }
