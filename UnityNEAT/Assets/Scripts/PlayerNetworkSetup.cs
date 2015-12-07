@@ -105,9 +105,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
             return;
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F))
-            controller.IsFrozen = !controller.IsFrozen;
-
         controller.IsFrozen = Input.GetMouseButton(1);
 
         if (seedSelections.Count == 0)
@@ -214,7 +211,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         var currentlySelectedSeed = collectedSeeds[scrollView.selectedIndex];
         currentlySelectedSeed.transform.RotateAround(currentlySelectedSeed.transform.position, Vector3.up + Vector3.forward, Time.deltaTime * selectedSeedRotationSpeed);
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.F))
         {
             if(isDraggingArtefact)
                 DropArtefact();
@@ -269,6 +266,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
             seedAnimation.PopDown();
             seedAnimation.transform.GetChild(2).gameObject.SetActive(false);
+            
+            draggedObject.StopDragging();
 
             Destroy(placeholderArtefact.gameObject);
             seedSelections.Clear();
@@ -450,6 +449,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
     void DropArtefact()
     {
+//#if UNITY_EDITOR
+//        if (Input.GetKey(KeyCode.LeftControl))
+//            UnityEditor.EditorApplication.isPaused = true;
+//#endif
         isDraggingArtefact = false;
 
         draggedObject.StopDragging();
