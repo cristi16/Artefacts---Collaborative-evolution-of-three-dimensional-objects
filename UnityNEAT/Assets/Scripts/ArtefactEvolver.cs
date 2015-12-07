@@ -17,7 +17,7 @@ public class ArtefactEvolver : NetworkBehaviour
     // maps seed unique ID to seed genome
     private Dictionary<uint, NeatGenome> seedsDictionary = new Dictionary<uint, NeatGenome>();
     private const int k_numberOfSeeds = 5;
-    private const int k_numberOfPreEvolutions = 5;
+    private const int k_numberOfPreEvolutions = 0;
     private const int k_numberOfInitialSeeds = 10;
 
     private uint idCount;
@@ -179,10 +179,10 @@ public class ArtefactEvolver : NetworkBehaviour
             yield return new WaitForEndOfFrame();
             var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
 
-            var mutationCount = UnityEngine.Random.Range(1, 5);
+            var mutationCount = UnityEngine.Random.Range(10, 20);
             for (int j = 0; j < mutationCount; j++)
             {
-                mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
+                mutatedGenome = evolutionHelper.MutateGenome(mutatedGenome);
             }
 
             var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;         
