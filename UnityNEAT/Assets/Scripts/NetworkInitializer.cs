@@ -30,6 +30,7 @@ public class NetworkInitializer : MonoBehaviour
         networkManager = FindObjectOfType<CustomNetworkManager>();
         // This allows us to send as much data as possible. However this means that connection to server will be slow if the servers keeps track of a lot of objects
         networkManager.connectionConfig.MaxSentMessageQueueSize = ushort.MaxValue;
+        networkManager.Start();
 
         ActivateInputField();
 

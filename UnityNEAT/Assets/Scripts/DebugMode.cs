@@ -5,9 +5,10 @@ public class DebugMode : MonoBehaviour
 {
     public GameObject panel;
     // Use this for initialization
-    void Start()
+    IEnumerator Start()
     {
-
+        yield return null;
+        panel.SetActive(false);
     }
 
     // Update is called once per frame
