@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -441,22 +442,18 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         draggedObject.playerTransform = this.transform;
         draggedObject.StartDragging();
-        CmdChangeAuthority(draggedObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, true);
-
-        hitInfo.collider.GetComponent<Highlighter>().ConstantOn(Color.white);
     }
 
 
     void DropArtefact()
     {
-//#if UNITY_EDITOR
-//        if (Input.GetKey(KeyCode.LeftControl))
-//            UnityEditor.EditorApplication.isPaused = true;
-//#endif
+#if UNITY_EDITOR
+        if (Input.GetKey(KeyCode.LeftControl))
+            UnityEditor.EditorApplication.isPaused = true;
+#endif
         isDraggingArtefact = false;
 
         draggedObject.StopDragging();
-        CmdChangeAuthority(draggedObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, false);
     }
 
     [Command]
