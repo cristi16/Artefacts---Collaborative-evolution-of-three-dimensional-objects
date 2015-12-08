@@ -145,7 +145,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     CmdHideSeed(hitInfo.collider.GetComponent<NetworkIdentity>().netId);
 
                     sideUI.ShowUI(collectedSeeds.Count);
-                    if (collectedSeeds.Count == 2 && playedseedUIHighlight == false)
+                    if (collectedSeeds.Count == 5 && playedseedUIHighlight == false)
                     {
                         playedseedUIHighlight = true;
                         seedUIborder.GetComponent<Animator>().SetTrigger("show");

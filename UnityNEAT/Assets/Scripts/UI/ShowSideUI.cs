@@ -26,7 +26,7 @@ public class ShowSideUI : MonoBehaviour
             PlayerPrefs.SetInt("firstSeed", 1);
             animation.Play(states[0].name);
         }
-        else if (numberOfCollectedSeeds == 2 && PlayerPrefs.GetInt("secondSeed") == 0)
+        else if (numberOfCollectedSeeds == 5 && PlayerPrefs.GetInt("secondSeed") == 0)
         {
             PlayerPrefs.SetInt("secondSeed", 1);
             animation.Play(states[1].name);
