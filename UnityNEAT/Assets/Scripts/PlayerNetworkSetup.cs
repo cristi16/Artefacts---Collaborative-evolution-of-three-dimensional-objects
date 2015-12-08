@@ -35,6 +35,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private PopupUIElement pickUpIcon;
     private PopupUIElement moveArtefactIcon;
     private PopupUIElement plantIcon;
+    private PopupUIElement rotateArtefactIcon;
+    private PopupUIElement dropArtefactIcon;
+    private PopupUIElement attachArtefactIcon;
     private GameObject selectSeedKey;
     private GameObject seedUIborder;
     private bool playedseedUIHighlight = false;
@@ -81,6 +84,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
             UpdateName();
 
             pickUpIcon = GameObject.FindGameObjectWithTag("PickUpIcon").GetComponent<PopupUIElement>();
+            rotateArtefactIcon = GameObject.FindGameObjectWithTag("RotateArtefact").GetComponent<PopupUIElement>();
+            dropArtefactIcon = GameObject.FindGameObjectWithTag("DropArtefact").GetComponent<PopupUIElement>();
+            attachArtefactIcon = GameObject.FindGameObjectWithTag("AttachArtefact").GetComponent<PopupUIElement>();
             moveArtefactIcon = GameObject.FindGameObjectWithTag("MoveArtefactIcon").GetComponent<PopupUIElement>();
             plantIcon = GameObject.FindGameObjectWithTag("PlantIcon").GetComponent<PopupUIElement>();
             seedAnimation = GameObject.FindGameObjectWithTag("SeedAnimation").GetComponent<PopupUIElement>();
@@ -199,6 +205,26 @@ public class PlayerNetworkSetup : NetworkBehaviour
             {
                 moveArtefactIcon.PopDown();
                 hoveringOverArtefact = false;
+            }
+        }
+
+        if (isDraggingArtefact)
+        {
+            if (draggedObject.contactPoints.Count == 0)
+            {
+                if (attachArtefactIcon.IsUp)
+                {
+                    attachArtefactIcon.PopDown();
+                    dropArtefactIcon.PopUp();
+                }
+            }
+            else
+            {
+                if (attachArtefactIcon.IsUp == false)
+                {
+                    attachArtefactIcon.PopUp();
+                    dropArtefactIcon.PopDown();
+                }
             }
         }
 
@@ -441,6 +467,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         draggedObject.playerTransform = this.transform;
         draggedObject.StartDragging();
+
+        rotateArtefactIcon.PopUp();
+        dropArtefactIcon.PopUp();
     }
 
 
@@ -453,6 +482,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
         isDraggingArtefact = false;
 
         draggedObject.StopDragging();
+
+        rotateArtefactIcon.PopDown();
+        dropArtefactIcon.PopDown();
+        attachArtefactIcon.PopDown();
     }
 
     [Command]

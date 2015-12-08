@@ -6,6 +6,8 @@ public class PopupUIElement : MonoBehaviour
     private Animation popAnimation;
     private AnimationState state;
 
+    public bool IsUp = false;
+
     void Start()
     {
         popAnimation = GetComponent<Animation>();
@@ -25,6 +27,8 @@ public class PopupUIElement : MonoBehaviour
             state.time = 0f;
             popAnimation.Play();
         }
+
+        IsUp = true;
     }
     [ContextMenu("Popdown")]
     public void PopDown()
@@ -40,5 +44,7 @@ public class PopupUIElement : MonoBehaviour
             state.time = state.length;
             popAnimation.Play();
         }
+
+        IsUp = false;
     }
 }

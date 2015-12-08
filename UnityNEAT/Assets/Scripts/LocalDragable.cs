@@ -74,6 +74,16 @@ public class LocalDragable : MonoBehaviour
                 {
                     body.AddTorque(-playerTransform.up * 5000 * Time.deltaTime);
                 }
+
+                if (Input.GetKey(KeyCode.Q))
+                {
+                    body.AddTorque(playerTransform.forward * 5000 * Time.deltaTime);
+                }
+
+                if (Input.GetKey(KeyCode.E))
+                {
+                    body.AddTorque(-playerTransform.forward * 5000 * Time.deltaTime);
+                }
             }
             else
             {

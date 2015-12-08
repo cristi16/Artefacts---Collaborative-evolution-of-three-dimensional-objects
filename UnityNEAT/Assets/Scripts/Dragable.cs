@@ -22,11 +22,14 @@ public class Dragable : NetworkBehaviour
     // colliders for which we have a fixed joint component
     public List<Collider> collidersWeAttachTo = new List<Collider>();
     // colliders that have a fixed joint component with us
-    public List<Collider> collidersAttachingToUs = new List<Collider>(); 
+    public List<Collider> collidersAttachingToUs = new List<Collider>();
+
+    private Highlighter highlighter;
 
     void Start()
     {
         body = GetComponent<Rigidbody>();
+        highlighter = GetComponent<Highlighter>();
     }
 
     public void StartDragging()
@@ -105,6 +108,8 @@ public class Dragable : NetworkBehaviour
                 body.angularDrag = 100f;
                 draggingHelper.CmdSetVelocity(velocity);
             }
+
+            highlighter.On(contactPoints.Count > 0 ? Color.yellow : Color.white);
 
             yield return null;
         }
