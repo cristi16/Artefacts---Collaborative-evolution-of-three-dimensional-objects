@@ -64,17 +64,26 @@ public class Artefact : NetworkBehaviour
         DisplayMesh(mesh);
         Profiler.EndSample();
 
-        StartCoroutine(WaitForPlayer());
-
-
         if (this.GetType() == typeof (Artefact))
         {
             //StartCoroutine(Grow());
             StartCoroutine(Glow());
+            StartCoroutine(WaitForPlayer());
         }
 
         //var countText = GameObject.FindGameObjectWithTag("ArtefactCounter").GetComponent<Text>();
         //countText.text =  "" + (int.Parse(countText.text) + 1);
+    }
+
+    IEnumerator TryToAttach()
+    {
+        if(!isServer) yield break;
+        var dragable = GetComponent<Dragable>();
+        dragable.playerTransform = ClientScene.localPlayers[0].gameObject.transform;
+
+        dragable.IsDragging = true;
+        yield return new WaitForEndOfFrame();
+        dragable.StopDragging(GetComponent<NetworkIdentity>().netId);
     }
 
     IEnumerator WaitForPlayer()
@@ -84,6 +93,8 @@ public class Artefact : NetworkBehaviour
         var localClient = ClientScene.localPlayers[0].gameObject.GetComponent<PlayerNetworkSetup>();
         localClient.CmdSaveArtefactColor(GenomeId, ArtefactEvaluator.artefactColor.r, ArtefactEvaluator.artefactColor.g, ArtefactEvaluator.artefactColor.b);
         localClient.CmdSaveSpawnPosition(GenomeId, transform.position);
+
+        //StartCoroutine(TryToAttach());
     }
 
     void DisplayMesh(Mesh mesh)

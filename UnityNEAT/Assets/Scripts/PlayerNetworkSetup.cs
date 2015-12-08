@@ -267,9 +267,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
             seedAnimation.PopDown();
             seedAnimation.transform.GetChild(2).gameObject.SetActive(false);
-            
-            draggedObject.StopDragging();
 
+            placeholderArtefact.GetComponent<LocalDragable>().StopDragging();
             Destroy(placeholderArtefact.gameObject);
             seedSelections.Clear();
 
@@ -409,9 +408,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         placeholderArtefact.GetComponent<Highlighter>().ConstantOn(Color.white);
 
-        draggedObject = placeholderArtefact.gameObject.AddComponent<Dragable>();
-        draggedObject.playerTransform = transform;
-        draggedObject.StartDragging();
+        var draggedPlaceholder = placeholderArtefact.gameObject.AddComponent<LocalDragable>();
+        draggedPlaceholder.playerTransform = transform;
+        draggedPlaceholder.StartDragging();
     }
 
     void UpdateSeedAnimation(int previousCount)

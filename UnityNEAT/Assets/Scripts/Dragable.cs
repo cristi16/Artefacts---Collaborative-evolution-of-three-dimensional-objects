@@ -10,7 +10,7 @@ public class Dragable : NetworkBehaviour
 {
     public const float k_DragDistance = 5f;
     [SyncVar]
-    public bool IsDragging;
+    public bool IsDragging = false;
 
     [SyncVar] public bool IsAttached;
 
@@ -31,6 +31,8 @@ public class Dragable : NetworkBehaviour
 
     public void StartDragging()
     {
+        //contactPoints.Clear();
+
         body = GetComponent<Rigidbody>();
         draggingHelper = playerTransform.GetComponent<DraggingHelper>();
 
@@ -46,6 +48,14 @@ public class Dragable : NetworkBehaviour
         IsDragging = false;
         draggingHelper.CmdStopDragging();
         GetComponent<Highlighter>().ConstantOff();
+    }
+
+    public void StopDragging(NetworkInstanceId netId)
+    {
+        draggingHelper = playerTransform.GetComponent<DraggingHelper>();
+
+        draggingHelper.CmdSetDraggedBody(netId);
+        StopDragging();
     }
 
     private IEnumerator DragObject(float distance)
@@ -133,10 +143,10 @@ public class Dragable : NetworkBehaviour
             var fixedJoint = gameObject.AddComponent<FixedJoint>();
             fixedJoint.enableCollision = true;
             fixedJoint.connectedBody = rb;
-            
 
             if (isServer)
                 rb.GetComponent<Dragable>().IsAttached = true;
+
             collidersWeAttachTo.Add(rb.GetComponent<Collider>());
             rb.GetComponent<Dragable>().collidersAttachingToUs.Add(GetComponent<Collider>());
         }

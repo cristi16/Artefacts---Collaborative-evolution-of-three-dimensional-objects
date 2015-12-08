@@ -8,6 +8,19 @@ public class DraggingHelper : NetworkBehaviour
     private Rigidbody draggedBody;
 
     [Command]
+    public void CmdSetDraggedBody(NetworkInstanceId netId)
+    {
+        draggedBody = NetworkServer.FindLocalObject(netId).GetComponent<Rigidbody>();
+        RpcSetDraggedBody(netId);
+    }
+
+    [ClientRpc]
+    void RpcSetDraggedBody(NetworkInstanceId netId)
+    {
+        draggedBody = ClientScene.FindLocalObject(netId).GetComponent<Rigidbody>();
+    }
+
+    [Command]
     public void CmdSetVelocity(Vector3 velocity)
     {
         draggedBody.velocity = velocity;
