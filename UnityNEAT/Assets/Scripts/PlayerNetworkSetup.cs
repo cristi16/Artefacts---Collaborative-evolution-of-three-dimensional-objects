@@ -153,6 +153,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
                     return;
                 }
+
+                if (Input.GetMouseButtonDown(1))
+                {
+                    CmdDestroySeed(hitInfo.collider.GetComponent<ArtefactSeed>().GenomeId);
+                    CmdDestroySeedObject(hitInfo.collider.GetComponent<NetworkIdentity>().netId);
+                    return;
+                }
             }
             else
             {
@@ -177,6 +184,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 if (Input.GetMouseButtonDown(0))
                 {
                     PickupArtefact();
+                    return;
+                }
+
+
+                if (Input.GetMouseButtonDown(1))
+                {
+                    CmdDeleteArtefact(hitInfo.collider.GetComponent<NetworkIdentity>().netId);
                     return;
                 }
             }
@@ -534,6 +548,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
         // When a client picks up a seed it goes in the inventory. The object is not destroyed though so it will still exist on the other clients.
         //Ideally we should create a copy and destroy the network objects. However, for now, we just move it far away so the other clients can't see it and pick it up.
         NetworkServer.FindLocalObject(netId).transform.position = Vector3.up*10000f;
+    }
+
+    [Command]
+    void CmdDeleteArtefact(NetworkInstanceId netId)
+    {
+        NetworkServer.Destroy(NetworkServer.FindLocalObject(netId));
     }
 
 }
