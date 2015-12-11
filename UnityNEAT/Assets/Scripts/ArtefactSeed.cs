@@ -5,6 +5,8 @@ public class ArtefactSeed : Artefact
 {
     public float spawnJumpForce = 30f;
 
+    [HideInInspector] public bool IsInInventory;
+
     [HideInInspector]
     public Vector3 facingDirection;
 

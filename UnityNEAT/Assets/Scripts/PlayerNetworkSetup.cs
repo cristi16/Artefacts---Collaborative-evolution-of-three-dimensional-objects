@@ -60,6 +60,12 @@ public class PlayerNetworkSetup : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
+        StartCoroutine(WaitForServer());
+    }
+
+    IEnumerator WaitForServer()
+    {
+        yield return new WaitForEndOfFrame();
         evolver = FindObjectOfType<ArtefactEvolver>();
     }
 
@@ -545,9 +551,15 @@ public class PlayerNetworkSetup : NetworkBehaviour
     [Command]
     void CmdHideSeed(NetworkInstanceId netId)
     {
+        var localObject = NetworkServer.FindLocalObject(netId);
+
         // When a client picks up a seed it goes in the inventory. The object is not destroyed though so it will still exist on the other clients.
         //Ideally we should create a copy and destroy the network objects. However, for now, we just move it far away so the other clients can't see it and pick it up.
-        NetworkServer.FindLocalObject(netId).transform.position = Vector3.up*10000f;
+        localObject.transform.position = Vector3.up*10000f;
+
+        // mark it as In Inventory
+        localObject.GetComponent<ArtefactSeed>().IsInInventory = true;
+        evolver.RemoveSeedFromScene(localObject.GetComponent<ArtefactSeed>());
     }
 
     [Command]

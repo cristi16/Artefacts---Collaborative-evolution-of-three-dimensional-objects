@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using SharpNeat.Genomes.Neat;
 using UnityEngine;
@@ -16,9 +17,11 @@ public class ArtefactEvolver : NetworkBehaviour
     private EvolutionHelper evolutionHelper;
     // maps seed unique ID to seed genome
     private Dictionary<uint, NeatGenome> seedsDictionary = new Dictionary<uint, NeatGenome>();
+    private List<ArtefactSeed> artefactSeedsInScene = new List<ArtefactSeed>();
     private const int k_numberOfSeeds = 5;
     private const int k_numberOfPreEvolutions = 0;
     private const int k_numberOfInitialSeeds = 10;
+    private const int k_maxNumberOfSeedsInScene = 120;
 
     private uint idCount;
     private string serverStartTime;
@@ -43,6 +46,8 @@ public class ArtefactEvolver : NetworkBehaviour
         StartCoroutine(SpawnInitialArtefacts(initialGenome));
         //StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5, Quaternion.identity.eulerAngles, initialGenome.Id));
         StartCoroutine(SaveStatistics());
+
+        StartCoroutine(CleanupSeeds());
     }
 
     public void SpawnSeedFromMutation(uint seedID, Vector3 spawnPosition, Vector3 eulerAngles, string playerName, uint parent)
@@ -126,7 +131,8 @@ public class ArtefactEvolver : NetworkBehaviour
 
             NetworkServer.Spawn(seedInstance.gameObject);
 
-            seedsDictionary.Add(seedInstance.GenomeId, seedGenome);      
+            seedsDictionary.Add(seedInstance.GenomeId, seedGenome);
+            artefactSeedsInScene.Add(seedInstance); 
         }
     }
 
@@ -189,6 +195,28 @@ public class ArtefactEvolver : NetworkBehaviour
             var position = direction * UnityEngine.Random.Range(15f, 50f);
             position.y = 2f;
             StartCoroutine(SpawnArtefactWithSeeds(mutatedGenome, position, Quaternion.LookRotation(direction).eulerAngles, initialGenome.Id));
+        }
+    }
+
+    public void RemoveSeedFromScene(ArtefactSeed seed)
+    {
+        artefactSeedsInScene.Remove(seed);
+    }
+
+    IEnumerator CleanupSeeds()
+    {
+        while (true)
+        {
+            if (artefactSeedsInScene.Count > k_maxNumberOfSeedsInScene)
+            {
+                var excces = artefactSeedsInScene.Count - k_maxNumberOfSeedsInScene;
+                for (int i = 0; i < excces; i++)
+                {
+                    NetworkServer.Destroy(artefactSeedsInScene[i].gameObject);
+                }
+                artefactSeedsInScene.RemoveRange(0, excces);
+            }
+            yield return null;
         }
     }
 }
