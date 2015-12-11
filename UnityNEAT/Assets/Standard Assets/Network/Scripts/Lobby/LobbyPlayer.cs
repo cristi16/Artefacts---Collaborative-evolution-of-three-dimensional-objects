@@ -147,6 +147,9 @@ namespace UnityStandardAssets.Network
             if (playerName == "")
                 CmdNameChanged("Player" + LobbyPlayerList._instance.playerListContentTransform.childCount);
 
+            if(PlayerPrefs.HasKey("PlayerName"))
+                CmdNameChanged(PlayerPrefs.GetString("PlayerName"));
+
             //we switch from simple name display to name input
 
             nameInput.onEndEdit.RemoveAllListeners();
@@ -214,6 +217,9 @@ namespace UnityStandardAssets.Network
         public void OnNameChanged(string str)
         {
             CmdNameChanged(str);
+
+            PlayerPrefs.SetString("PlayerName", str);
+            
         }
 
         //====== Client RPC
@@ -226,7 +232,7 @@ namespace UnityStandardAssets.Network
         [ClientRpc]
         public void RpcUpdateCountdown(int countdown)
         {
-            LobbyManager.s_Singleton.infoPanel.Display("Match Starting in " + countdown, "", null, false);
+            LobbyManager.s_Singleton.infoPanel.Display("Starting in " + countdown, "", null, false);
 
             if (countdown == 0)
                 LobbyManager.s_Singleton.infoPanel.gameObject.SetActive(false);
