@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -31,6 +31,9 @@ namespace UnityStandardAssets.Network
 
         public void ToggleVisibility(bool visible)
         {
+            Cursor.visible = visible;
+            Cursor.lockState = visible ? CursorLockMode.None : CursorLockMode.Locked;
+
             isDisplayed = visible;
             foreach (Transform t in transform)
             {
