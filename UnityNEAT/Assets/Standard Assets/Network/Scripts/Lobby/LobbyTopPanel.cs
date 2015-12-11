@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Reflection.Emit;
 
 namespace UnityStandardAssets.Network
 {
@@ -8,12 +9,13 @@ namespace UnityStandardAssets.Network
     {
         public bool isInGame = false;
 
+        public GameObject quitPanel;
+        public GameObject backButton;
+
         protected bool isDisplayed = true;
-        protected Image panelImage;
 
         void Start()
         {
-            panelImage = GetComponent<Image>();
         }
 
 
@@ -21,6 +23,8 @@ namespace UnityStandardAssets.Network
         {
             if (!isInGame)
                 return;
+
+            backButton.SetActive(!isInGame);
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -40,9 +44,9 @@ namespace UnityStandardAssets.Network
                 t.gameObject.SetActive(isDisplayed);
             }
 
-            if (panelImage != null)
+            if (isInGame && quitPanel != null)
             {
-                panelImage.enabled = isDisplayed;
+                quitPanel.SetActive(isDisplayed);
             }
         }
     }

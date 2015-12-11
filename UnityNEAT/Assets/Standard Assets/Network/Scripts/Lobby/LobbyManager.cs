@@ -90,8 +90,8 @@ namespace UnityStandardAssets.Network
                     ChangeTo(mainMenuPanel);
                 }
 
-                topPanel.ToggleVisibility(true);
                 topPanel.isInGame = false;
+                topPanel.ToggleVisibility(true);
             }
             else
             {
