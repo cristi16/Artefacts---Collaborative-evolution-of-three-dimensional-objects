@@ -100,6 +100,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             seedUIborder = GameObject.FindGameObjectWithTag("SeedUIBorder");
             sideUI = GameObject.FindGameObjectWithTag("SideUI").GetComponent<ShowSideUI>();
             controller = GetComponentInChildren<FirstPersonController>();
+            transform.position += Vector3.up * 2f;
         }
     }
 
@@ -118,7 +119,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             return;
         }
 
-        controller.IsFrozen = Input.GetMouseButton(1);
+        controller.IsFrozen = Input.GetMouseButton(1) && (seedSelections.Count > 0 || isDraggingArtefact);
 
         if (seedSelections.Count == 0)
         {
@@ -135,7 +136,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     pickupIconCount++;
                 }
 
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButton(0))
                 {
                     CmdPickedUpSeed();
                     hitInfo.collider.transform.rotation = Quaternion.identity;
@@ -160,7 +161,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     return;
                 }
 
-                if (Input.GetMouseButtonDown(1))
+                if (Input.GetMouseButton(1))
                 {
                     CmdDestroySeed(hitInfo.collider.GetComponent<ArtefactSeed>().GenomeId);
                     CmdDestroySeedObject(hitInfo.collider.GetComponent<NetworkIdentity>().netId);
@@ -194,7 +195,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 }
 
 
-                if (Input.GetMouseButtonDown(1))
+                if (Input.GetMouseButton(1))
                 {
                     CmdDeleteArtefact(hitInfo.collider.GetComponent<NetworkIdentity>().netId);
                     return;

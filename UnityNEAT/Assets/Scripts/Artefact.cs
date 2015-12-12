@@ -94,7 +94,7 @@ public class Artefact : NetworkBehaviour
         localClient.CmdSaveArtefactColor(GenomeId, ArtefactEvaluator.artefactColor.r, ArtefactEvaluator.artefactColor.g, ArtefactEvaluator.artefactColor.b);
         localClient.CmdSaveSpawnPosition(GenomeId, transform.position);
 
-        //StartCoroutine(TryToAttach());
+        StartCoroutine(TryToAttach());
     }
 
     void DisplayMesh(Mesh mesh)
@@ -110,7 +110,8 @@ public class Artefact : NetworkBehaviour
         //var concaveCollider = gameObject.AddComponent<ConcaveCollider>();
         //concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
         //concaveCollider.ComputeHulls(null, null);
-        gameObject.AddComponent<MeshCollider>().convex = true;
+        //gameObject.AddComponent<MeshCollider>().convex = true;
+        gameObject.AddComponent<BoxCollider>();
     }
 
     IEnumerator Glow()

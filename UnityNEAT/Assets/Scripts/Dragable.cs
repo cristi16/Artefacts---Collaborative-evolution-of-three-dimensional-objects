@@ -75,32 +75,32 @@ public class Dragable : NetworkBehaviour
                 body.angularDrag = 5f;
                 if (Input.GetKey(KeyCode.W))
                 {
-                    draggingHelper.CmdAddTorque(playerTransform.right * 5000 * Time.deltaTime);
+                    draggingHelper.CmdAddTorque(playerTransform.right);
                 }
 
                 if (Input.GetKey(KeyCode.S))
                 {
-                    draggingHelper.CmdAddTorque(-playerTransform.right * 5000 * Time.deltaTime);
+                    draggingHelper.CmdAddTorque(-playerTransform.right);
                 }
 
                 if (Input.GetKey(KeyCode.A))
                 {
-                    draggingHelper.CmdAddTorque(playerTransform.up * 5000 * Time.deltaTime);
+                    draggingHelper.CmdAddTorque(playerTransform.up );
                 }
 
                 if (Input.GetKey(KeyCode.D))
                 {
-                    draggingHelper.CmdAddTorque(-playerTransform.up * 5000 * Time.deltaTime);
+                    draggingHelper.CmdAddTorque(-playerTransform.up);
                 }
 
                 if (Input.GetKey(KeyCode.Q))
                 {
-                    draggingHelper.CmdAddTorque(playerTransform.forward * 5000 * Time.deltaTime);
+                    draggingHelper.CmdAddTorque(playerTransform.forward );
                 }
 
                 if (Input.GetKey(KeyCode.E))
                 {
-                    draggingHelper.CmdAddTorque(-playerTransform.forward * 5000 * Time.deltaTime);
+                    draggingHelper.CmdAddTorque(-playerTransform.forward);
                 }
             }
             else

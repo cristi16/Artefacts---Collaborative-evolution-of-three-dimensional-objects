@@ -121,6 +121,9 @@ public class ArtefactEvolver : NetworkBehaviour
         for(int i = 0; i < k_numberOfSeeds; i++)
         {
             var seedGenome = evolutionHelper.MutateGenome(genome);
+            for (int j = 0; j < i; j++)
+                seedGenome = evolutionHelper.MutateGenome(genome);
+
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
             var seedInstance = CreateArtefactInstance<ArtefactSeed>(seedGenome, seedPrefab, artefactInstance.transform.position + direction * 3f, Quaternion.LookRotation(direction).eulerAngles);

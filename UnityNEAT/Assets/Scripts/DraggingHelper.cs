@@ -29,7 +29,8 @@ public class DraggingHelper : NetworkBehaviour
     [Command]
     public void CmdAddTorque(Vector3 torque)
     {
-        draggedBody.AddTorque(torque);
+        //draggedBody.AddTorque(torque);
+        draggedBody.transform.RotateAround(draggedBody.transform.position, torque, 100f * Time.deltaTime);
     }
 
     [Command]
@@ -67,6 +68,7 @@ public class DraggingHelper : NetworkBehaviour
         if (dragable.IsAttached)
             dragable.DetachJoints();
 
+        draggedBody.isKinematic = false;
         draggedBody.useGravity = false;
         draggedBody.drag = 12f;
     }
@@ -80,6 +82,7 @@ public class DraggingHelper : NetworkBehaviour
         draggedBody.velocity = Vector3.zero;
         draggedBody.angularVelocity = Vector3.zero;
 
+        draggedBody.isKinematic = true;
         draggedBody.useGravity = true;
         draggedBody.drag = 1f;
         draggedBody.angularDrag = 5f;
