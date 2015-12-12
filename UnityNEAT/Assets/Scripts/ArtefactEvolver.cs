@@ -3,6 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Xml;
 using SharpNeat.Genomes.Neat;
 using UnityEngine;
@@ -24,7 +29,7 @@ public class ArtefactEvolver : NetworkBehaviour
     private const int k_maxNumberOfSeedsInScene = 120;
 
     private uint idCount;
-    private string serverStartTime;
+    public string serverStartTime;
     private string savePath;
 
     public override void OnStartServer()
@@ -178,6 +183,7 @@ public class ArtefactEvolver : NetworkBehaviour
     {
         base.OnNetworkDestroy();
         Statistics.Instance.Serialize(savePath);
+        SendEmail(savePath + "/statistics.txt");
         Debug.Log("Server destroyed");
     }
 
@@ -221,5 +227,38 @@ public class ArtefactEvolver : NetworkBehaviour
             }
             yield return null;
         }
+    }
+
+    public void SendEmail(string filePath)
+    {
+
+        var fromAddress = new MailAddress("patrascu.cristinel@gmail.com", "User");
+        var toAddress = new MailAddress("patrascu.cristinel@gmail.com", "Cristi");
+        const string fromPassword = "5pl1nt3rQ";
+        const string subject = "Statistics";
+        string body = "Timestamp: " + serverStartTime;
+
+        ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        { return true; };
+
+        var smtp = new SmtpClient
+        {
+            Host = "smtp.gmail.com",
+            Port = 587,
+            EnableSsl = true,            
+            DeliveryMethod = SmtpDeliveryMethod.Network,
+            UseDefaultCredentials = false,
+            Credentials = new NetworkCredential(fromAddress.Address, fromPassword) as ICredentialsByHost
+        };
+        using (var message = new MailMessage(fromAddress, toAddress)
+        {
+            Subject = subject,
+            Body = body,
+            Attachments = { new Attachment(filePath) }
+        })
+        {
+            smtp.Send(message);
+        }
+        Debug.Log("success");       
     }
 }

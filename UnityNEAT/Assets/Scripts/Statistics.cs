@@ -58,6 +58,12 @@ public class Statistics
 
     public void Serialize(string path)
     {
-        File.WriteAllText(path + "/statistics.txt", JsonConvert.SerializeObject(this));
+        string serializedData = JsonConvert.SerializeObject(this);
+        File.WriteAllText(path + "/statistics.txt", serializedData);
+    }
+
+    public string Serialize()
+    {
+        return JsonConvert.SerializeObject(this);
     }
 }
