@@ -41,6 +41,9 @@ namespace UnityStandardAssets.Network
         void Start()
         {
             s_Singleton = this;
+            connectionConfig.IsAcksLong = true;
+            connectionConfig.MaxSentMessageQueueSize = 512;
+
             _lobbyHooks = GetComponent<UnityStandardAssets.Network.LobbyHook>();
             currentPanel = mainMenuPanel;
 

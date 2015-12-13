@@ -27,6 +27,12 @@ public class DraggingHelper : NetworkBehaviour
     }
 
     [Command]
+    public void CmdAddForce(Vector3 force)
+    {
+        draggedBody.AddForce(force);
+    }
+
+    [Command]
     public void CmdAddTorque(Vector3 torque)
     {
         //draggedBody.AddTorque(torque);

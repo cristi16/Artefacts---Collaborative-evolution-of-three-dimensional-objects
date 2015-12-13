@@ -126,8 +126,6 @@ public class ArtefactEvolver : NetworkBehaviour
         for(int i = 0; i < k_numberOfSeeds; i++)
         {
             var seedGenome = evolutionHelper.MutateGenome(genome);
-            for (int j = 0; j < i; j++)
-                seedGenome = evolutionHelper.MutateGenome(genome);
 
             var direction = Quaternion.Euler(0f, (360f / k_numberOfSeeds) * i, 0f) * Vector3.forward;
 
@@ -183,7 +181,8 @@ public class ArtefactEvolver : NetworkBehaviour
     {
         base.OnNetworkDestroy();
         Statistics.Instance.Serialize(savePath);
-        SendEmail(savePath + "/statistics.txt");
+
+        //SendEmail(savePath + "/statistics.txt");
         Debug.Log("Server destroyed");
     }
 

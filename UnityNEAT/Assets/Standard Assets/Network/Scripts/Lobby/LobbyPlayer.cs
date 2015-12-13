@@ -211,6 +211,7 @@ namespace UnityStandardAssets.Network
 
         public void OnReadyClicked()
         {
+            PlayerPrefs.SetString("PlayerName", nameInput.text);
             SendReadyToBeginMessage();
         }
 

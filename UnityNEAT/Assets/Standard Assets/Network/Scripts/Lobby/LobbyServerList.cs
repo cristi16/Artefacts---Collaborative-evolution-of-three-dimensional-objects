@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
@@ -31,6 +31,16 @@ namespace UnityStandardAssets.Network
             noServerFound.SetActive(false);
 
             RequestPage(0);
+            StartCoroutine(RefreshPage());
+        }
+
+        IEnumerator RefreshPage()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(5f);
+                RequestPage(currentPage);
+            }
         }
 
         public void OnGUIMatchList(ListMatchResponse response)
@@ -40,6 +50,8 @@ namespace UnityStandardAssets.Network
                 if (currentPage == 0)
                 {
                     noServerFound.SetActive(true);
+                    foreach (Transform t in serverListRect)
+                        Destroy(t.gameObject);
                 }
 
                 currentPage = previousPage;

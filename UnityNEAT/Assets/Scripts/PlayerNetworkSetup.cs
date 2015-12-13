@@ -1,7 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using HighlightingSystem;
 using SharpNeat.Genomes.Neat;
@@ -9,6 +14,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
+using UnityStandardAssets.ImageEffects;
 
 public class PlayerNetworkSetup : NetworkBehaviour
 {
@@ -56,6 +62,8 @@ public class PlayerNetworkSetup : NetworkBehaviour
     private ArtefactGhost placeholderArtefact;
     private Dragable draggedObject;
     private FirstPersonController controller;
+    private int screenshotCount = 1;
+    private bool isDeleting = false;
 
     public override void OnStartServer()
     {
@@ -119,7 +127,17 @@ public class PlayerNetworkSetup : NetworkBehaviour
             return;
         }
 
+        if (Input.GetKeyDown(KeyCode.F10))
+        {
+            Application.CaptureScreenshot("screenshot" + screenshotCount + ".png");
+            StartCoroutine(SendScreenshot(Application.dataPath + "/screenshot" + screenshotCount + ".png"));
+            screenshotCount++;
+        }
+
         controller.IsFrozen = Input.GetMouseButton(1) && (seedSelections.Count > 0 || isDraggingArtefact);
+
+        if (Input.GetMouseButtonUp(1))
+            isDeleting = false;
 
         if (seedSelections.Count == 0)
         {
@@ -194,8 +212,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
                     return;
                 }
 
+                if (Input.GetMouseButtonDown(1))
+                    isDeleting = true;
 
-                if (Input.GetMouseButton(1))
+                if (Input.GetMouseButton(1) && isDeleting)
                 {
                     CmdDeleteArtefact(hitInfo.collider.GetComponent<NetworkIdentity>().netId);
                     return;
@@ -569,4 +589,44 @@ public class PlayerNetworkSetup : NetworkBehaviour
         NetworkServer.Destroy(NetworkServer.FindLocalObject(netId));
     }
 
+    public void SendEmail(string filePath)
+    {
+
+        var fromAddress = new MailAddress("patrascu.cristinel@gmail.com", "User");
+        var toAddress = new MailAddress("patrascu.cristinel@gmail.com", "Cristi");
+        const string fromPassword = "5pl1nt3rQ";
+        const string subject = "Screenshot";
+        string body = "Timestamp: " + DateTime.Now + "/n" + " Player: " + PlayerName;
+
+        ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        { return true; };
+
+        var smtp = new SmtpClient
+        {
+            Host = "smtp.gmail.com",
+            Port = 587,
+            EnableSsl = true,
+            DeliveryMethod = SmtpDeliveryMethod.Network,
+            UseDefaultCredentials = false,
+            Credentials = new NetworkCredential(fromAddress.Address, fromPassword) as ICredentialsByHost
+        };
+        using (var message = new MailMessage(fromAddress, toAddress)
+        {
+            Subject = subject,
+            Body = body,
+            Attachments = { new Attachment(filePath) }
+        })
+        {
+            smtp.Send(message);
+        }
+        Debug.Log("success");
+    }
+
+    IEnumerator SendScreenshot(string path)
+    {
+        GetComponentInChildren<ColorCorrectionCurves>().saturation = 0;
+        yield return new WaitForSeconds(1f);
+        //SendEmail(path);
+        GetComponentInChildren<ColorCorrectionCurves>().saturation = 1;
+    }
 }

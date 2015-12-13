@@ -70,6 +70,13 @@ public class Dragable : NetworkBehaviour
             var force = (desiredPosition - transform.position) * 5000;
             var velocity = (force / body.mass) * Time.fixedDeltaTime;
 
+            Debug.DrawLine(transform.position, transform.position + transform.forward * 10);
+
+            if (Input.GetMouseButtonUp(1))
+            {
+                distance = Vector3.Distance(transform.position, playerTransform.position);
+            }
+
             if (Input.GetMouseButton(1))
             {
                 body.angularDrag = 5f;
@@ -102,6 +109,10 @@ public class Dragable : NetworkBehaviour
                 {
                     draggingHelper.CmdAddTorque(-playerTransform.forward);
                 }
+
+                var scrollInput = Input.GetAxis("Mouse ScrollWheel");
+                if (Mathf.Abs(scrollInput) >= 0.1f)
+                    draggingHelper.CmdAddForce(ray.direction * Math.Sign(scrollInput) * 2000f);
             }
             else
             {

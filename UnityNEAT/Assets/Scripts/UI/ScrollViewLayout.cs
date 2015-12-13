@@ -33,7 +33,7 @@ public class ScrollViewLayout : MonoBehaviour
         }
 
         var scrollInput = Input.GetAxis("Mouse ScrollWheel");
-        if (Mathf.Abs(scrollInput) >= 0.1f && numberOfChildren > 1)
+        if (Mathf.Abs(scrollInput) >= 0.1f && numberOfChildren > 1 && Input.GetMouseButton(1) == false)
         {
             verticalPosition += Mathf.Sign(scrollInput) * 1f/ (numberOfChildren - 1);
             verticalPosition = Mathf.Clamp01(verticalPosition);

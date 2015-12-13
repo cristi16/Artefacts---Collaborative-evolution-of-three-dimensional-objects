@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Reflection.Emit;
+using UnityEngine.Networking;
 
 namespace UnityStandardAssets.Network
 {
@@ -44,7 +45,7 @@ namespace UnityStandardAssets.Network
                 t.gameObject.SetActive(isDisplayed);
             }
 
-            if (isInGame && quitPanel != null)
+            if (isInGame && quitPanel != null && LobbyManager.singleton.IsClientConnected())
             {
                 quitPanel.SetActive(isDisplayed);
             }

@@ -46,44 +46,60 @@ public class LocalDragable : MonoBehaviour
 
     private IEnumerator DragObject(float distance)
     {
+
         while (IsDragging)
         {
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
             var desiredPosition = ray.GetPoint(distance);
             var force = (desiredPosition - transform.position) * 1000;
 
+            if (Input.GetMouseButtonUp(1))
+            {
+                distance = Vector3.Distance(transform.position, playerTransform.position);
+            }
+
             if (Input.GetMouseButton(1))
             {
                 body.angularDrag = 5f;
                 if (Input.GetKey(KeyCode.W))
                 {
-                    body.AddTorque(playerTransform.right * 5000 * Time.deltaTime);
+                    body.transform.RotateAround(body.transform.position, playerTransform.right, 100f * Time.deltaTime);
+                    //body.AddTorque(playerTransform.right * 5000 * Time.deltaTime);
                 }
 
                 if (Input.GetKey(KeyCode.S))
                 {
-                    body.AddTorque(-playerTransform.right * 5000 * Time.deltaTime);
+                    body.transform.RotateAround(body.transform.position, -playerTransform.right, 100f * Time.deltaTime);
+                    //body.AddTorque(-playerTransform.right * 5000 * Time.deltaTime);
                 }
 
                 if (Input.GetKey(KeyCode.A))
                 {
-                    body.AddTorque(playerTransform.up * 5000 * Time.deltaTime);
+                    body.transform.RotateAround(body.transform.position, playerTransform.up, 100f * Time.deltaTime);
+                   // body.AddTorque(playerTransform.up * 5000 * Time.deltaTime);
                 }
 
                 if (Input.GetKey(KeyCode.D))
                 {
-                    body.AddTorque(-playerTransform.up * 5000 * Time.deltaTime);
+                    body.transform.RotateAround(body.transform.position, -playerTransform.up, 100f * Time.deltaTime);
+                    //body.AddTorque(-playerTransform.up * 5000 * Time.deltaTime);
                 }
 
                 if (Input.GetKey(KeyCode.Q))
                 {
-                    body.AddTorque(playerTransform.forward * 5000 * Time.deltaTime);
+                    body.transform.RotateAround(body.transform.position, playerTransform.forward, 100f * Time.deltaTime);
+                    //body.AddTorque(playerTransform.forward * 5000 * Time.deltaTime);
                 }
 
                 if (Input.GetKey(KeyCode.E))
                 {
-                    body.AddTorque(-playerTransform.forward * 5000 * Time.deltaTime);
+                    body.transform.RotateAround(body.transform.position, -playerTransform.forward, 100f * Time.deltaTime);
+                    //body.AddTorque(-playerTransform.forward * 5000 * Time.deltaTime);
                 }
+
+                var scrollInput = Input.GetAxis("Mouse ScrollWheel");
+                if (Mathf.Abs(scrollInput) >= 0.1f)
+                    body.AddForce(ray.direction * Math.Sign(scrollInput) * 2000f);
             }
             else
             {
