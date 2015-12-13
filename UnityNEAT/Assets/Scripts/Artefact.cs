@@ -72,7 +72,7 @@ public class Artefact : NetworkBehaviour
         }
 
         //var countText = GameObject.FindGameObjectWithTag("ArtefactCounter").GetComponent<Text>();
-        //countText.text =  "" + (int.Parse(countText.text) + 1);
+        //countText.text = "" + (int.Parse(countText.text) + 1);
     }
 
     IEnumerator TryToAttach()
