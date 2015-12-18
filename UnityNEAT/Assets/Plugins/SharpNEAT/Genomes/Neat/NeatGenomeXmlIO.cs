@@ -228,7 +228,7 @@ namespace SharpNeat.Genomes.Neat
             xw.WriteStartElement(__ElemNetwork);
             xw.WriteAttributeString(__AttrId, genome.Id.ToString(NumberFormatInfo.InvariantInfo));
             xw.WriteAttributeString(__AttrBirthGeneration, genome.BirthGeneration.ToString(NumberFormatInfo.InvariantInfo));
-            xw.WriteAttributeString(__AttrFitness, genome.EvaluationInfo.Fitness.ToString("R", NumberFormatInfo.InvariantInfo));
+            xw.WriteAttributeString(__AttrFitness, genome.EvaluationInfo.Fitness.ToString("F3", NumberFormatInfo.InvariantInfo));
 
             // Emit nodes.
             StringBuilder sb = new StringBuilder();
@@ -257,7 +257,7 @@ namespace SharpNeat.Genomes.Neat
                 xw.WriteAttributeString(__AttrId, cGene.InnovationId.ToString(NumberFormatInfo.InvariantInfo));
                 xw.WriteAttributeString(__AttrSourceId, cGene.SourceNodeId.ToString(NumberFormatInfo.InvariantInfo));
                 xw.WriteAttributeString(__AttrTargetId, cGene.TargetNodeId.ToString(NumberFormatInfo.InvariantInfo));
-                xw.WriteAttributeString(__AttrWeight, cGene.Weight.ToString("R", NumberFormatInfo.InvariantInfo));
+                xw.WriteAttributeString(__AttrWeight, cGene.Weight.ToString("F3", NumberFormatInfo.InvariantInfo));
                 xw.WriteEndElement();
             }
             xw.WriteEndElement();
