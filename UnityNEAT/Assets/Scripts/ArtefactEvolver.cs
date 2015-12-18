@@ -9,6 +9,7 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
+using Newtonsoft.Json;
 using SharpNeat.Genomes.Neat;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -24,7 +25,7 @@ public class ArtefactEvolver : NetworkBehaviour
     private Dictionary<uint, NeatGenome> seedsDictionary = new Dictionary<uint, NeatGenome>();
     private List<ArtefactSeed> artefactSeedsInScene = new List<ArtefactSeed>();
     private const int k_numberOfSeeds = 5;
-    private const int k_numberOfPreEvolutions = 0;
+    private const int k_numberOfPreEvolutions = 50;
     private const int k_numberOfInitialSeeds = 10;
     private const int k_maxNumberOfSeedsInScene = 120;
 
@@ -61,7 +62,6 @@ public class ArtefactEvolver : NetworkBehaviour
 
         SaveGenome(seedsDictionary[seedID], seedID + ".gnm.xml");
 
-        Statistics.Instance.totalOfPlantedArtefacts++;
         Statistics.Instance.AddArtefact(seedID, seedsDictionary[seedID].BirthGeneration);
         var playerStatistics = Statistics.Instance.players[playerName];
         playerStatistics.numberOfPlanedArtefact++;
@@ -84,7 +84,6 @@ public class ArtefactEvolver : NetworkBehaviour
 
         SaveGenome(validGenome, validGenome.Id + ".gnm.xml");
 
-        Statistics.Instance.totalOfPlantedArtefacts++;
         Statistics.Instance.AddArtefact(validGenome.Id, validGenome.BirthGeneration);
         var playerStatistics = Statistics.Instance.players[playerName];
         playerStatistics.numberOfPlanedArtefact++;
@@ -147,14 +146,17 @@ public class ArtefactEvolver : NetworkBehaviour
         var artefactInstance = Instantiate(prefab);
 
         var serializedGenome = NeatGenomeXmlIO.Save(genome, true).OuterXml;
-        //var byteCount = System.Text.ASCIIEncoding.ASCII.GetByteCount(serializedGenome);
-        //Debug.LogWarning("Byte count: " + byteCount); 
+        var byteCount = System.Text.ASCIIEncoding.ASCII.GetByteCount(serializedGenome);
+        Debug.LogWarning("Byte count: " + byteCount); 
 
         var artefact = artefactInstance.GetComponent<T>();
         artefact.SerializedGenome = serializedGenome;
         artefact.GenomeId = genome.Id;
         artefact.transform.position = initialPosition;
         artefact.transform.eulerAngles = initialRotation;
+
+        // Crazy hack to avoid errors complaining that messages is too long to be received for serializedGenome. Plus, we need to enable Developer Logging on the NetworkManager. Otherwise it still throws errors
+        artefact.ClearAllDirtyBits();
         return artefact;
     }
 
