@@ -55,7 +55,8 @@ public class LocalDragable : MonoBehaviour
 
             if (Input.GetMouseButtonUp(1))
             {
-                distance = Vector3.Distance(transform.position, playerTransform.position);
+                distance = Vector3.Distance(ray.origin, transform.position);
+                desiredPosition = ray.GetPoint(distance);
             }
 
             if (Input.GetMouseButton(1))
@@ -99,12 +100,12 @@ public class LocalDragable : MonoBehaviour
 
                 var scrollInput = Input.GetAxis("Mouse ScrollWheel");
                 if (Mathf.Abs(scrollInput) >= 0.1f)
-                    body.AddForce(ray.direction * Math.Sign(scrollInput) * 2000f);
+                    transform.position = transform.position + ray.direction * Math.Sign(scrollInput) * 0.5f;
             }
             else
             {
                 body.angularDrag = 100;
-                body.AddForce(force);
+                transform.position = desiredPosition;
             }
 
             yield return null;
