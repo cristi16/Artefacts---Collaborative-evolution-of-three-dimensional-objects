@@ -1,9 +1,12 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Types;
 using UnityEngine.Networking.Match;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 
 namespace UnityStandardAssets.Network
@@ -53,6 +56,27 @@ namespace UnityStandardAssets.Network
             DontDestroyOnLoad(gameObject);
 
             SetServerInfo("Offline", "None");
+        }
+
+        public override void OnServerConnect(NetworkConnection conn)
+        {
+            base.OnServerConnect(conn);
+
+            Type serverType = typeof(NetworkServer);
+            FieldInfo info = serverType.GetField("maxPacketSize",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            ushort maxPackets = 1500;
+            info.SetValue(null, maxPackets);
+        }
+
+        public override void OnLobbyClientConnect(NetworkConnection conn)
+        {
+            base.OnLobbyClientConnect(conn);
+            Type serverType = typeof(NetworkServer);
+            FieldInfo info = serverType.GetField("maxPacketSize",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            ushort maxPackets = 1500;
+            info.SetValue(null, maxPackets);
         }
 
         public override void OnLobbyClientSceneChanged(NetworkConnection conn)
