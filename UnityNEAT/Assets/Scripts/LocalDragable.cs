@@ -116,8 +116,6 @@ public class LocalDragable : MonoBehaviour
     {
         body.useGravity = false;
         body.drag = 12f;
-        GetComponent<Rigidbody>().isKinematic = false;
-        GetComponent<Collider>().enabled = false;
     }
 
     void Stop()
