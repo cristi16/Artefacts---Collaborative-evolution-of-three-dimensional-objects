@@ -146,8 +146,8 @@ public class ArtefactEvolver : NetworkBehaviour
         var artefactInstance = Instantiate(prefab);
 
         var serializedGenome = NeatGenomeXmlIO.Save(genome, true).OuterXml;
-        var byteCount = System.Text.ASCIIEncoding.ASCII.GetByteCount(serializedGenome);
-        Debug.LogWarning("Byte count: " + byteCount); 
+        //var byteCount = System.Text.ASCIIEncoding.ASCII.GetByteCount(serializedGenome);
+        //Debug.LogWarning("Byte count: " + byteCount); 
 
         var artefact = artefactInstance.GetComponent<T>();
         artefact.SerializedGenome = serializedGenome;
