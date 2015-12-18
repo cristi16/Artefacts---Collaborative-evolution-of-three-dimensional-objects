@@ -377,5 +377,23 @@ namespace UnityStandardAssets.Network
             ChangeTo(mainMenuPanel);
             infoPanel.Display("Cient error : " + (errorCode == 6 ? "timeout" : errorCode.ToString()), "Close", null);
         }
+
+        public void OnMatchJoined(JoinMatchResponse matchInfo)
+        {
+            if (LogFilter.logDebug)
+                Debug.Log((object)"NetworkManager OnMatchJoined ");
+            if (matchInfo.success)
+            {
+                if(UnityEngine.Networking.Utility.GetAccessTokenForNetwork(matchInfo.networkId) == null)
+                    UnityEngine.Networking.Utility.SetAccessTokenForNetwork(matchInfo.networkId, new NetworkAccessToken(matchInfo.accessTokenString));
+                this.StartClient(new MatchInfo(matchInfo));
+            }
+            else
+            {
+                if (!LogFilter.logError)
+                    return;
+                Debug.LogError((object)("Join Failed:" + (object)matchInfo));
+            }
+        }
     }
 }
