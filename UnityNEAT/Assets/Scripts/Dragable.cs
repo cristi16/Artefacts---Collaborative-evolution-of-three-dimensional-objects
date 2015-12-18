@@ -12,10 +12,11 @@ public class Dragable : NetworkBehaviour
     [SyncVar]
     public bool IsDragging = false;
 
-    [SyncVar] public bool IsAttached;
+    [SyncVar]
+    public bool IsAttached;
 
     public Transform playerTransform;
-    public DraggingHelper draggingHelper;
+    //public DraggingHelper draggingHelper;
 
     private Rigidbody body;
     public List<ContactPoint> contactPoints = new List<ContactPoint>();
@@ -32,15 +33,25 @@ public class Dragable : NetworkBehaviour
         highlighter = GetComponent<Highlighter>();
     }
 
+    public override void OnStartAuthority()
+    {
+        base.OnStartAuthority();
+        if (IsDragging)
+        {
+            CmdSetDragging(true);
+        }
+    }
+
     public void StartDragging()
     {
         //contactPoints.Clear();
 
         body = GetComponent<Rigidbody>();
-        draggingHelper = playerTransform.GetComponent<DraggingHelper>();
+        //draggingHelper = playerTransform.GetComponent<DraggingHelper>();
 
         IsDragging = true;
-        draggingHelper.CmdStartDragging(GetComponent<NetworkIdentity>().netId);
+        body.isKinematic = false;
+        //draggingHelper.CmdStartDragging(GetComponent<NetworkIdentity>().netId);
         GetComponent<Highlighter>().ConstantOn(Color.white);
 
         StartCoroutine(DragObject(k_DragDistance));
@@ -49,15 +60,16 @@ public class Dragable : NetworkBehaviour
     public void StopDragging()
     {
         IsDragging = false;
-        draggingHelper.CmdStopDragging();
+        body.isKinematic = true;
+        CmdSetDragging(false);
         GetComponent<Highlighter>().ConstantOff();
     }
 
     public void StopDragging(NetworkInstanceId netId)
     {
-        draggingHelper = playerTransform.GetComponent<DraggingHelper>();
+        //draggingHelper = playerTransform.GetComponent<DraggingHelper>();
 
-        draggingHelper.CmdSetDraggedBody(netId);
+        //draggingHelper.CmdSetDraggedBody(netId);
         StopDragging();
     }
 
@@ -67,14 +79,13 @@ public class Dragable : NetworkBehaviour
         {
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
             var desiredPosition = ray.GetPoint(distance);
-            var force = (desiredPosition - transform.position) * 5000;
-            var velocity = (force / body.mass) * Time.fixedDeltaTime;
 
-            Debug.DrawLine(transform.position, transform.position + transform.forward * 10);
+            Debug.DrawLine(ray.origin, ray.origin + ray.direction * distance);
 
             if (Input.GetMouseButtonUp(1))
             {
-                distance = Vector3.Distance(transform.position, playerTransform.position);
+                distance = Vector3.Distance(ray.origin, transform.position);
+                desiredPosition = ray.GetPoint(distance);
             }
 
             if (Input.GetMouseButton(1))
@@ -82,42 +93,43 @@ public class Dragable : NetworkBehaviour
                 body.angularDrag = 5f;
                 if (Input.GetKey(KeyCode.W))
                 {
-                    draggingHelper.CmdAddTorque(playerTransform.right);
+                    AddTorque(playerTransform.right);
                 }
 
                 if (Input.GetKey(KeyCode.S))
                 {
-                    draggingHelper.CmdAddTorque(-playerTransform.right);
+                    AddTorque(-playerTransform.right);
                 }
 
                 if (Input.GetKey(KeyCode.A))
                 {
-                    draggingHelper.CmdAddTorque(playerTransform.up );
+                    AddTorque(playerTransform.up);
                 }
 
                 if (Input.GetKey(KeyCode.D))
                 {
-                    draggingHelper.CmdAddTorque(-playerTransform.up);
+                    AddTorque(-playerTransform.up);
                 }
 
                 if (Input.GetKey(KeyCode.Q))
                 {
-                    draggingHelper.CmdAddTorque(playerTransform.forward );
+                    AddTorque(playerTransform.forward);
                 }
 
                 if (Input.GetKey(KeyCode.E))
                 {
-                    draggingHelper.CmdAddTorque(-playerTransform.forward);
+                    AddTorque(-playerTransform.forward);
                 }
 
                 var scrollInput = Input.GetAxis("Mouse ScrollWheel");
                 if (Mathf.Abs(scrollInput) >= 0.1f)
-                    draggingHelper.CmdAddForce(ray.direction * Math.Sign(scrollInput) * 2000f);
+                    transform.position = transform.position + ray.direction * Math.Sign(scrollInput) * 0.5f;
             }
             else
             {
                 body.angularDrag = 100f;
-                draggingHelper.CmdSetVelocity(velocity);
+                transform.position = desiredPosition;
+                //transform.LookAt(ray.origin);
             }
 
             highlighter.On(contactPoints.Count > 0 ? Color.yellow : Color.white);
@@ -126,11 +138,36 @@ public class Dragable : NetworkBehaviour
         }
     }
 
+    [Command]
+    private void CmdSetDragging(bool value)
+    {
+        IsDragging = value;
+        RpcSetDragging(value);
+    }
+
+    [ClientRpc]
+    private void RpcSetDragging(bool value)
+    {
+        GetComponent<Rigidbody>().isKinematic = !value;
+        GetComponent<Collider>().enabled = !value;
+    }
+
+    void AddTorque(Vector3 axis)
+    {
+        //if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButton(1))
+        //{
+        //    transform.RotateAround(transform.position, axis, 15);
+        //    transform.eulerAngles = new Vector3(((int)transform.eulerAngles.x / 15) * 15, ((int)transform.eulerAngles.y / 15) * 15, ((int)transform.eulerAngles.z / 15) * 15);
+        //}
+        //else
+            transform.RotateAround(transform.position, axis, 100f * Time.deltaTime);
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         if (IsDragging && LayerMask.LayerToName(collision.gameObject.layer) == "Artefact")
         {
-            if(contactPoints.Any(x => x.otherCollider == collision.collider)) return;
+            if (contactPoints.Any(x => x.otherCollider == collision.collider)) return;
 
             contactPoints.Add(collision.contacts[0]);
             collision.gameObject.GetComponent<Rigidbody>().isKinematic = true;

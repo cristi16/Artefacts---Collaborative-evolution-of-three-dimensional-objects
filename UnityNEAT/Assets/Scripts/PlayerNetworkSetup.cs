@@ -508,6 +508,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         draggedObject.playerTransform = this.transform;
         draggedObject.StartDragging();
+        CmdChangeAuthority(draggedObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, true);
 
         rotateArtefactIcon.PopUp();
         dropArtefactIcon.PopUp();
@@ -523,6 +524,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         isDraggingArtefact = false;
 
         draggedObject.StopDragging();
+        CmdChangeAuthority(draggedObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, false);
 
         rotateArtefactIcon.PopDown();
         dropArtefactIcon.PopDown();
