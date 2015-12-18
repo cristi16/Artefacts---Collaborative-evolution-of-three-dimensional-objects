@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,10 +15,8 @@ public class Statistics
     // planted artefacts based on genomeID
     public Dictionary<uint, ArtefactStatistics> artefacts;
 
-    // This collection represents the distribution of artefacts over color
-    public Dictionary<Vector3, int> colorDistribution;
-    //This collection represents the distribution of artefacts over generations
-    public Dictionary<uint, int> numberOfObjectsPerGeneration;
+    public string startTime;
+    public string endTime;
 
     private static Statistics _instance;
     public static Statistics Instance
@@ -58,12 +57,22 @@ public class Statistics
 
     public void Serialize(string path)
     {
+        var endTime = DateTime.Now.ToString("dd.MM.yy-hh.mm");
+        Directory.CreateDirectory(path + "/" + endTime);
+
         string serializedData = JsonConvert.SerializeObject(this);
+
         File.WriteAllText(path + "/statistics.txt", serializedData);
     }
 
     public string Serialize()
     {
         return JsonConvert.SerializeObject(this);
+    }
+
+    public static Statistics Deserialize(string path)
+    {
+        string data = File.ReadAllText(path);
+        return JsonConvert.DeserializeObject<Statistics>(data);
     }
 }
