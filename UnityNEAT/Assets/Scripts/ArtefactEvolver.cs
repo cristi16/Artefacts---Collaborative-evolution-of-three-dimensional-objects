@@ -25,7 +25,7 @@ public class ArtefactEvolver : NetworkBehaviour
     private Dictionary<uint, NeatGenome> seedsDictionary = new Dictionary<uint, NeatGenome>();
     private List<ArtefactSeed> artefactSeedsInScene = new List<ArtefactSeed>();
     private const int k_numberOfSeeds = 5;
-    private const int k_numberOfPreEvolutions = 50;
+    private const int k_numberOfPreEvolutions = 0;
     private const int k_numberOfInitialSeeds = 10;
     private const int k_maxNumberOfSeedsInScene = 120;
 
@@ -195,7 +195,7 @@ public class ArtefactEvolver : NetworkBehaviour
             yield return new WaitForEndOfFrame();
             var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
 
-            var mutationCount = UnityEngine.Random.Range(10, 20);
+            var mutationCount = UnityEngine.Random.Range(10, 50);
             for (int j = 0; j < mutationCount; j++)
             {
                 mutatedGenome = evolutionHelper.MutateGenome(mutatedGenome);

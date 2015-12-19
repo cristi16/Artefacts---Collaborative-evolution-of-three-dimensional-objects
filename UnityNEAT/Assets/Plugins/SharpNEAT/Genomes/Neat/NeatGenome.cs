@@ -727,8 +727,8 @@ namespace SharpNeat.Genomes.Neat
                     int tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount-1);
 
                     // exclude color outputs if we are within first X gen
-                    if(BirthGeneration < 10)
-                        tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount - 4);
+                    if(BirthGeneration < 20 && OutputNeuronCount >= 4)
+                        tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount - 3);
 
                     if (srcNeuronIdx == tgtNeuronIdx)  {
                         if(++tgtNeuronIdx == neuronCount) {
