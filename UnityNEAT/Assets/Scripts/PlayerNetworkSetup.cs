@@ -505,6 +505,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if(draggedObject.IsDragging) return;
 
         isDraggingArtefact = true;
+        draggedObject.hitPoint = hitInfo.point;
 
         draggedObject.playerTransform = this.transform;
         draggedObject.StartDragging();

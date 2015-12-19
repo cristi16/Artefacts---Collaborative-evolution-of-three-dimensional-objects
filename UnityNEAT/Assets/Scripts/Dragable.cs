@@ -16,6 +16,8 @@ public class Dragable : NetworkBehaviour
     public bool IsAttached;
 
     public Transform playerTransform;
+    public Vector3 hitPoint;
+    private Vector3 initialPosition;
     //public DraggingHelper draggingHelper;
 
     private Rigidbody body;
@@ -48,7 +50,7 @@ public class Dragable : NetworkBehaviour
 
         body = GetComponent<Rigidbody>();
         //draggingHelper = playerTransform.GetComponent<DraggingHelper>();
-
+        initialPosition = transform.position;
         IsDragging = true;
         body.isKinematic = false;
         //draggingHelper.CmdStartDragging(GetComponent<NetworkIdentity>().netId);
@@ -75,48 +77,57 @@ public class Dragable : NetworkBehaviour
 
     private IEnumerator DragObject(float distance)
     {
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+        distance = Vector3.Distance(ray.origin, hitPoint);
         while (IsDragging)
         {
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-            var desiredPosition = ray.GetPoint(distance);
+            ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+            var desiredPosition = ray.GetPoint(distance) - (hitPoint - initialPosition);
 
             Debug.DrawLine(ray.origin, ray.origin + ray.direction * distance);
 
             if (Input.GetMouseButtonUp(1))
-            {
-                distance = Vector3.Distance(ray.origin, transform.position);
-                desiredPosition = ray.GetPoint(distance);
+            {   
+                distance = Vector3.Distance(ray.origin, transform.position + (hitPoint - initialPosition));
+                desiredPosition = ray.GetPoint(distance) - (hitPoint - initialPosition);
             }
 
             if (Input.GetMouseButton(1))
             {
                 body.angularDrag = 5f;
-                if (Input.GetKey(KeyCode.W))
+                Func<KeyCode, bool> InputFunc = Input.GetKey;
+
+                if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    InputFunc = Input.GetKeyDown;
+                }
+
+                if (InputFunc(KeyCode.W))
                 {
                     AddTorque(playerTransform.right);
                 }
 
-                if (Input.GetKey(KeyCode.S))
+                if (InputFunc(KeyCode.S))
                 {
                     AddTorque(-playerTransform.right);
                 }
 
-                if (Input.GetKey(KeyCode.A))
+                if (InputFunc(KeyCode.A))
                 {
                     AddTorque(playerTransform.up);
                 }
 
-                if (Input.GetKey(KeyCode.D))
+                if (InputFunc(KeyCode.D))
                 {
                     AddTorque(-playerTransform.up);
                 }
 
-                if (Input.GetKey(KeyCode.Q))
+                if (InputFunc(KeyCode.Q))
                 {
                     AddTorque(playerTransform.forward);
                 }
 
-                if (Input.GetKey(KeyCode.E))
+                if (InputFunc(KeyCode.E))
                 {
                     AddTorque(-playerTransform.forward);
                 }
@@ -128,7 +139,7 @@ public class Dragable : NetworkBehaviour
 
                 var scrollInput = Input.GetAxis("Mouse ScrollWheel");
                 if (Mathf.Abs(scrollInput) >= 0.1f)
-                    transform.position = transform.position + ray.direction * Math.Sign(scrollInput) * 0.5f;
+                    transform.position = transform.position + ray.direction * Math.Sign(scrollInput) * 0.25f;
             }
             else
             {
@@ -159,10 +170,11 @@ public class Dragable : NetworkBehaviour
 
     void AddTorque(Vector3 axis)
     {
-        //if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButton(1))
+        //if (Input.GetKey(KeyCode.LeftShift))
         //{
-        //    transform.RotateAround(transform.position, axis, 15);
-        //    transform.eulerAngles = new Vector3(((int)transform.eulerAngles.x / 15) * 15, ((int)transform.eulerAngles.y / 15) * 15, ((int)transform.eulerAngles.z / 15) * 15);
+        //    var angle = 45;
+        //    transform.RotateAround(transform.position, axis, angle);
+        //    transform.localEulerAngles = new Vector3(((int)transform.localEulerAngles.x / angle) * angle, ((int)transform.localEulerAngles.y / angle) * angle, ((int)transform.localEulerAngles.z / angle) * angle);
         //}
         //else
             transform.RotateAround(transform.position, axis, 100f * Time.deltaTime);
