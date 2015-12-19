@@ -110,8 +110,8 @@ public class Artefact : NetworkBehaviour
         //var concaveCollider = gameObject.AddComponent<ConcaveCollider>();
         //concaveCollider.Algorithm = ConcaveCollider.EAlgorithm.Legacy;
         //concaveCollider.ComputeHulls(null, null);
-        //gameObject.AddComponent<MeshCollider>().convex = true;
-        gameObject.AddComponent<BoxCollider>();
+        gameObject.AddComponent<MeshCollider>().convex = true;
+        //gameObject.AddComponent<BoxCollider>();
     }
 
     IEnumerator Glow()

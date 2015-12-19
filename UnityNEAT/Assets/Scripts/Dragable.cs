@@ -121,6 +121,11 @@ public class Dragable : NetworkBehaviour
                     AddTorque(-playerTransform.forward);
                 }
 
+                //if (Input.GetKeyDown(KeyCode.Z))
+                //    transform.localScale += Vector3.one*0.1f;
+                //if (Input.GetKeyDown(KeyCode.X))
+                //    transform.localScale -= Vector3.one * 0.1f;
+
                 var scrollInput = Input.GetAxis("Mouse ScrollWheel");
                 if (Mathf.Abs(scrollInput) >= 0.1f)
                     transform.position = transform.position + ray.direction * Math.Sign(scrollInput) * 0.5f;

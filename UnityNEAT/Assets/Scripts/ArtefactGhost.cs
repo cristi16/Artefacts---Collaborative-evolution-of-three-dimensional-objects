@@ -60,6 +60,6 @@ public class ArtefactGhost : MonoBehaviour
         gameObject.GetComponent<MeshFilter>().mesh = mesh;
         gameObject.GetComponent<Renderer>().material.color = ArtefactEvaluator.artefactColor;
 
-        gameObject.AddComponent<MeshCollider>().convex = true;
+        //gameObject.AddComponent<MeshCollider>().convex = true;
     }
 }
