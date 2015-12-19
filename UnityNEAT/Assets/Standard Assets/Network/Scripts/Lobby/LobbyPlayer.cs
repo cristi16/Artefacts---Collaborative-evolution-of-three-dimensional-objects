@@ -180,7 +180,9 @@ namespace UnityStandardAssets.Network
                 ChangeReadyButtonColor(isLocalPlayer ? JoinColor : NotReadyColor);
 
                 Text textComponent = readyButton.transform.GetChild(0).GetComponent<Text>();
-                textComponent.text = isLocalPlayer ? "JOIN" : "...";
+                textComponent.text = isLocalPlayer ? "JOIN" : "NOT READY";
+                if (!isLocalPlayer)
+                    textComponent.fontSize = 23;
                 textComponent.color = Color.white;
                 readyButton.interactable = isLocalPlayer;
             }

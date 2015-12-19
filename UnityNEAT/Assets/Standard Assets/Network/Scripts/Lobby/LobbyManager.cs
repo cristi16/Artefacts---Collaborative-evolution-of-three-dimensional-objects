@@ -15,9 +15,6 @@ namespace UnityStandardAssets.Network
     {
         static public LobbyManager s_Singleton;
 
-        [Tooltip("The minimum number of players in the lobby before player can be ready")]
-        public int minPlayer;
-
         public LobbyTopPanel topPanel;
 
         public RectTransform mainMenuPanel;
@@ -275,7 +272,7 @@ namespace UnityStandardAssets.Network
             GameObject obj = Instantiate(lobbyPlayerPrefab.gameObject) as GameObject;
 
             LobbyPlayer newPlayer = obj.GetComponent<LobbyPlayer>();
-            newPlayer.RpcToggleJoinButton(numPlayers + 1 >= minPlayer); ;
+            newPlayer.RpcToggleJoinButton(numPlayers + 1 >= minPlayers); ;
 
             for (int i = 0; i < numPlayers; ++i)
             {
@@ -283,7 +280,7 @@ namespace UnityStandardAssets.Network
 
                 if (p != null)
                 {
-                    p.RpcToggleJoinButton(numPlayers + 1 >= minPlayer);
+                    p.RpcToggleJoinButton(numPlayers + 1 >= minPlayers);
                 }
             }
 
@@ -298,7 +295,7 @@ namespace UnityStandardAssets.Network
 
                 if (p != null)
                 {
-                    p.RpcToggleJoinButton(numPlayers >= minPlayer);
+                    p.RpcToggleJoinButton(numPlayers >= minPlayers);
                 }
             }
 
@@ -322,7 +319,31 @@ namespace UnityStandardAssets.Network
 
         public override void OnLobbyServerPlayersReady()
         {
+            int num = 0;
+            foreach (NetworkConnection conn in NetworkServer.connections)
+            {
+                if (conn != null)
+                    num += CheckConnectionIsReadyToBegin(conn);
+            }
+            if (this.minPlayers > 0 && num < NetworkServer.connections.Count)
+                return;
+
             StartCoroutine(ServerCountdownCoroutine());
+        }
+
+        private int CheckConnectionIsReadyToBegin(NetworkConnection conn)
+        {
+            int num = 0;
+            using (List<PlayerController>.Enumerator enumerator = conn.playerControllers.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    PlayerController current = enumerator.Current;
+                    if (current.IsValid && current.gameObject.GetComponent<NetworkLobbyPlayer>().readyToBegin)
+                        ++num;
+                }
+            }
+            return num;
         }
 
         public IEnumerator ServerCountdownCoroutine()
