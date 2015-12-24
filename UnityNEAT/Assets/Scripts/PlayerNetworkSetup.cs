@@ -127,7 +127,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.F10))
+        if (Input.GetKeyDown(KeyCode.F10) && Application.isEditor == false)
         {
             Application.CaptureScreenshot("screenshot" + screenshotCount + ".png");
             StartCoroutine(SendScreenshot(Application.dataPath + "/screenshot" + screenshotCount + ".png"));
@@ -592,44 +592,22 @@ public class PlayerNetworkSetup : NetworkBehaviour
         NetworkServer.Destroy(NetworkServer.FindLocalObject(netId));
     }
 
-    public void SendEmail(string filePath)
-    {
-
-        var fromAddress = new MailAddress("patrascu.cristinel@gmail.com", "User");
-        var toAddress = new MailAddress("patrascu.cristinel@gmail.com", "Cristi");
-        const string fromPassword = "5pl1nt3rQ";
-        const string subject = "Screenshot";
-        string body = "Timestamp: " + DateTime.Now + "/n" + " Player: " + PlayerName;
-
-        ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        { return true; };
-
-        var smtp = new SmtpClient
-        {
-            Host = "smtp.gmail.com",
-            Port = 587,
-            EnableSsl = true,
-            DeliveryMethod = SmtpDeliveryMethod.Network,
-            UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(fromAddress.Address, fromPassword) as ICredentialsByHost
-        };
-        using (var message = new MailMessage(fromAddress, toAddress)
-        {
-            Subject = subject,
-            Body = body,
-            Attachments = { new Attachment(filePath) }
-        })
-        {
-            smtp.Send(message);
-        }
-        Debug.Log("success");
-    }
-
     IEnumerator SendScreenshot(string path)
     {
         GetComponentInChildren<ColorCorrectionCurves>().saturation = 0;
-        yield return new WaitForSeconds(1f);
-        //SendEmail(path);
+        yield return new WaitForSeconds(0.1f);
         GetComponentInChildren<ColorCorrectionCurves>().saturation = 1;
+        // wait for screenshot to be saved to disk
+        yield return new WaitForSeconds(1f);
+
+        var extension = Path.GetExtension(path);
+        var relativePath = Path.GetDirectoryName(path);
+
+        var renamed = relativePath + "/" + PlayerName + "_" + DateTime.Now.ToString("dd.MM.yy-hh.mm.ss") + extension;
+        Debug.Log(renamed);
+        File.Move(path, renamed);
+
+        GetComponent<FileUploader>().UploadFile(renamed);
+        
     }
 }

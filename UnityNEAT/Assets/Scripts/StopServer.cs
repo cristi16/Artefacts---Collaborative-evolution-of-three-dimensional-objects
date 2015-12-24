@@ -4,10 +4,22 @@ using UnityStandardAssets.Network;
 
 public class StopServer : MonoBehaviour
 {
+    public GameObject panel;
 
     public void Stop()
     {
-        LobbyManager.s_Singleton.GoBackButton();
+        if(ArtefactEvolver.Instance != null)
+            ArtefactEvolver.Instance.SaveStatistics();
+        StartCoroutine(StartStopping());
+    }
 
+    IEnumerator StartStopping()
+    {
+        while (FileUploader.isUploading)
+        {
+            yield return null;
+        }
+        LobbyManager.s_Singleton.GoBackButton();
+        panel.SetActive(false);
     }
 }

@@ -54,14 +54,14 @@ public class ArtefactEvaluator
 
                     // store output values
                     ISignalArray outputArr = phenome.OutputSignalArray;
-                    processedOutput[x, y, z] = (float)outputArr[0];
-                    cleanOutput[x, y, z] = (float)outputArr[0];
+                    processedOutput[x, y, z] = (float)outputArr[3];
+                    cleanOutput[x, y, z] = (float)outputArr[3];
 
                     if (phenome.OutputSignalArray.Length >= 4)
                     {
-                        r += (float)outputArr[1];
-                        g += (float)outputArr[2];
-                        b += (float)outputArr[3];
+                        r += (float)outputArr[0];
+                        g += (float)outputArr[1];
+                        b += (float)outputArr[2];
                     }
 
                     // store min and max output values

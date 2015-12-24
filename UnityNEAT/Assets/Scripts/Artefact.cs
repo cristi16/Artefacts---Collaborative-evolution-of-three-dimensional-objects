@@ -17,7 +17,7 @@ public class Artefact : NetworkBehaviour
     public Material artefactMaterial;
 
     [HideInInspector, SyncVar] public string SerializedGenome;
-    [HideInInspector, SyncVar] public uint GenomeId;
+    [SyncVar] public uint GenomeId;
     [HideInInspector, SyncVar] public uint Parent1Id;
     [HideInInspector, SyncVar] public uint Parent2Id;
 

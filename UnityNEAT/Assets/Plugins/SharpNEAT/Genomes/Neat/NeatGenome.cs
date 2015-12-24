@@ -718,23 +718,30 @@ namespace SharpNeat.Genomes.Neat
                     // Valid source nodes are bias, input and hidden nodes. Output nodes are not source node candidates
                     // for acyclic nets (because that can prevent futrue conenctions from targeting the output if it would
                     // create a cycle).
-                    int srcNeuronIdx = _genomeFactory.Rng.Next(inputBiasHiddenNeuronCount);
-                    if(srcNeuronIdx >= _inputAndBiasNeuronCount && srcNeuronIdx < _inputBiasOutputNeuronCount) {
+
+                    int srcNeuronIdx =_genomeFactory.Rng.Next(inputBiasHiddenNeuronCount);
+
+                    // avoid connections to hidden node in the beginning
+                    if (BirthGeneration <= 10 && OutputNeuronCount >= 4)
+                        srcNeuronIdx = 1 + _genomeFactory.Rng.Next(inputBiasHiddenNeuronCount - 1);
+
+                    if (srcNeuronIdx >= _inputAndBiasNeuronCount && srcNeuronIdx < _inputBiasOutputNeuronCount) {
                         srcNeuronIdx += _outputNeuronCount;
                     }
 
-                    // Valid target nodes are all hidden and output nodes.
-                    int tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount-1);
-
                     // exclude color outputs if we are within first X gen
-                    if(BirthGeneration < 20 && OutputNeuronCount >= 4)
-                        tgtNeuronIdx = _inputAndBiasNeuronCount + _genomeFactory.Rng.Next(hiddenOutputNeuronCount - 3);
+                    var outputNodeOffset = 0;
+                    if (BirthGeneration <= 10 && OutputNeuronCount >= 4)
+                        outputNodeOffset = 3;
+
+                    // Valid target nodes are all hidden and output nodes.
+                    int tgtNeuronIdx = _inputAndBiasNeuronCount + outputNodeOffset + _genomeFactory.Rng.Next(hiddenOutputNeuronCount - outputNodeOffset);
 
                     if (srcNeuronIdx == tgtNeuronIdx)  {
                         if(++tgtNeuronIdx == neuronCount) {
                             // Wrap around to first possible target neuron (first output).
                             // ENHANCEMENT: Devise more efficient strategy. This can still select the same node as source and target (the cyclic conenction is tested for below). 
-                            tgtNeuronIdx = _inputAndBiasNeuronCount;
+                            tgtNeuronIdx = _inputAndBiasNeuronCount + outputNodeOffset;
                         }
                     }
 

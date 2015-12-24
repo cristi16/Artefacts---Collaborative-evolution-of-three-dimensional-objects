@@ -9,7 +9,6 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
-using Newtonsoft.Json;
 using SharpNeat.Genomes.Neat;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -19,6 +18,7 @@ public class ArtefactEvolver : NetworkBehaviour
 {
     public GameObject artefactPrefab;
     public GameObject seedPrefab;
+    public static ArtefactEvolver Instance;
 
     private EvolutionHelper evolutionHelper;
     // maps seed unique ID to seed genome
@@ -35,6 +35,8 @@ public class ArtefactEvolver : NetworkBehaviour
 
     public override void OnStartServer()
     {
+        Instance = this;
+
         base.OnStartServer();
 
         serverStartTime = DateTime.Now.ToString("dd.MM.yy-hh.mm");
@@ -51,7 +53,6 @@ public class ArtefactEvolver : NetworkBehaviour
 
         StartCoroutine(SpawnInitialArtefacts(initialGenome));
         //StartCoroutine(SpawnArtefactWithSeeds(initialGenome, Vector3.up * 5, Quaternion.identity.eulerAngles, initialGenome.Id));
-        StartCoroutine(SaveStatistics());
 
         StartCoroutine(CleanupSeeds());
     }
@@ -170,22 +171,16 @@ public class ArtefactEvolver : NetworkBehaviour
         }
     }
 
-    IEnumerator SaveStatistics()
+    public void SaveStatistics()
     {
-        while (true)
-        {
-            yield return new WaitForSeconds(10f);
-            //Statistics.Instance.Serialize(serverStartTime);
-        }
-    }
-
-    public override void OnNetworkDestroy()
-    {
-        base.OnNetworkDestroy();
         Statistics.Instance.Serialize(savePath);
 
-        //SendEmail(savePath + "/statistics.txt");
-        Debug.Log("Server destroyed");
+        if (Application.isEditor == false)
+        {
+            var renamedPath = savePath + "/" + serverStartTime  + "_" + DateTime.Now.ToString("dd.MM.yy-hh.mm") + ".txt";
+            File.Move(savePath + "/statistics.txt", renamedPath);
+            GetComponent<FileUploader>().UploadFile(renamedPath);
+        }
     }
 
     IEnumerator SpawnInitialArtefacts(NeatGenome initialGenome)
@@ -195,12 +190,12 @@ public class ArtefactEvolver : NetworkBehaviour
             yield return new WaitForEndOfFrame();
             var mutatedGenome = evolutionHelper.MutateGenome(initialGenome);
 
-            var mutationCount = UnityEngine.Random.Range(10, 50);
-            for (int j = 0; j < mutationCount; j++)
+            var mutationCount = UnityEngine.Random.Range(10, 30);
+            for (int j = 0; j < mutationCount - 2; j++)
             {
                 mutatedGenome = evolutionHelper.MutateGenome(mutatedGenome);
             }
-
+            //SaveGenome(mutatedGenome, mutatedGenome.Id + ".gnm.xml");
             var direction = Quaternion.Euler(0f, (360f / k_numberOfInitialSeeds) * i, 0f) * Vector3.forward;         
             var position = direction * UnityEngine.Random.Range(15f, 50f);
             position.y = 2f;
@@ -228,38 +223,5 @@ public class ArtefactEvolver : NetworkBehaviour
             }
             yield return null;
         }
-    }
-
-    public void SendEmail(string filePath)
-    {
-
-        var fromAddress = new MailAddress("patrascu.cristinel@gmail.com", "User");
-        var toAddress = new MailAddress("patrascu.cristinel@gmail.com", "Cristi");
-        const string fromPassword = "5pl1nt3rQ";
-        const string subject = "Statistics";
-        string body = "Timestamp: " + serverStartTime;
-
-        ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        { return true; };
-
-        var smtp = new SmtpClient
-        {
-            Host = "smtp.gmail.com",
-            Port = 587,
-            EnableSsl = true,            
-            DeliveryMethod = SmtpDeliveryMethod.Network,
-            UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(fromAddress.Address, fromPassword) as ICredentialsByHost
-        };
-        using (var message = new MailMessage(fromAddress, toAddress)
-        {
-            Subject = subject,
-            Body = body,
-            Attachments = { new Attachment(filePath) }
-        })
-        {
-            smtp.Send(message);
-        }
-        Debug.Log("success");       
     }
 }
