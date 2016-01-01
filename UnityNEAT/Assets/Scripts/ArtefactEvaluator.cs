@@ -54,8 +54,8 @@ public class ArtefactEvaluator
 
                     // store output values
                     ISignalArray outputArr = phenome.OutputSignalArray;
-                    processedOutput[x, y, z] = (float)outputArr[3];
-                    cleanOutput[x, y, z] = (float)outputArr[3];
+                    processedOutput[x, y, z] = phenome.OutputSignalArray.Length >= 4 ? (float)outputArr[3] : (float)outputArr[0];
+                    cleanOutput[x, y, z] = processedOutput[x, y, z];
 
                     if (phenome.OutputSignalArray.Length >= 4)
                     {
@@ -107,7 +107,7 @@ public class ArtefactEvaluator
                     // if initially, border value at 0,0,0 was maxFill, we invert all values so minFill is on the border
                     if (Mathf.Approximately(cleanOutput[0, 0, 0], maxOutputValue))
                         processedOutput[index00, index01, index02] = minOutputValue + (maxOutputValue - processedOutput[index00, index01, index02]);
-                    // based on a threshold ( middle value between min and max) we change the value to either 0 or 1. This give a look instead of smooth details
+                    // based on a threshold ( middle value between min and max) we change the value to either 0 or 1. This give a blocky look instead of smooth details
                     processedOutput[index00, index01, index02] = processedOutput[index00, index01, index02] < minOutputValue + (maxOutputValue - minOutputValue) / 2f ? 0f : 1f;
                 }
 

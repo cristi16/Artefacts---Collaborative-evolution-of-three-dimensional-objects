@@ -721,7 +721,7 @@ namespace SharpNeat.Genomes.Neat
 
                     int srcNeuronIdx =_genomeFactory.Rng.Next(inputBiasHiddenNeuronCount);
 
-                    // avoid connections to hidden node in the beginning
+                    // avoid connections to bias node in the beginning
                     if (BirthGeneration <= 10 && OutputNeuronCount >= 4)
                         srcNeuronIdx = 1 + _genomeFactory.Rng.Next(inputBiasHiddenNeuronCount - 1);
 
