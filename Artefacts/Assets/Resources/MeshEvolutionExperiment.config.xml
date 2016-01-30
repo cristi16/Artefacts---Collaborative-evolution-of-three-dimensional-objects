@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+    <Config>
+      <PopulationSize>1</PopulationSize>
+      <Activation>
+        <Scheme>Acyclic</Scheme>
+      </Activation>
+      <Description>
+        Interactive evolution of a 3D mesh
+      </Description>
+
+    </Config>
